@@ -1,0 +1,50 @@
+Clínica de Psicologia - MenteSerena
+
+Uma necessidade que se têm hoje é de conseguir digitalizar todos os documentos e acompanhamentos dos pacientes, com as datas que eles estão realizando. Precisaria de um sistema que pudesse digitalizar e salvar esses arquivos no cadastro desses pacientes, e que conseguisse fazer novos registros a partir do próprio sistema.
+
+Um ponto bem importante é a questão do sigilo, por exemplo, teriam 3 níveis de acesso, o aluno só pode ter acesso ao paciente que ele tá atendendo, o professor tem acesso a todos os alunos e os pacientes que os alunos atendem e o administrador com acesso ilimitado, e o acesso do login também deve ser somente local por conta da segurança e do sigilo.
+
+O paciente tem o direito de ter acesso à toda a documentação, então seria interessante que tenha no sistema a possibilidade de imprimir ou gerar um pdf dos documentos selecionados.
+
+O paciente realiza um cadastro com informações pessoais, quando ele chega numa sessão que vão ficar separadas umas das outras (cada sessão é um registro).
+
+Nas sessões ficam registradas o dia e horário, aluno que tá atendendo e também a possibilidade de subir o upload de um arquivo com as anotações da sessão (CKeditor).
+
+Tudo que está no prontuário o paciente pode pedir, mas o terapeuta pode fazer algumas anotações para ele mesmo se nortear, se planejar, e essa parte o cliente não precisa ter acesso, para isso, são dois campos separados (campo do prontuário e campo de anotações) e o campo de anotações fica visível para todos menos para o paciente na impressão.
+
+Ia ser legal também de conseguir emitir um relatório de presença do paciente com as datas e horários no último mês por exemplo (por isso fazer as sessões separadas para poder realizar o relatório assim).
+
+O aluno tem um prazo de 24 ou 48 horas para finalizar o atendimento, (vou na clínica, sou atendido e quem me atende tem que lançar no sistema dentro do prazo), se não realizar dentro do tempo estabelecido, o sistema deve enviar uma mensagem, gravando alguma coisa na tabela de, por exemplo, avisos para o professor DELE dizendo que ele está faltando com a atualização.
+
+Do mesmo modo que é interessante ver o relatório de presença do paciente, no acesso de administrador poderia fazer um relatório de quantos atendimentos foram realizados no semestre inteiro, ou no período específico. (No atendimento, como vai ser individualizado cada atendimento, com a data e hora, pode ser feito um filtro com a data inicial e final para gerar o relatório).
+
+<--------------------------------------------------------------->
+
+Requisitos:
+Precisa de um sistema digital para prontuários.
+
+O sistema deverá digitalizar todos os documentos e acompanhamentos dos pacientes, com as datas que eles estão realizando.
+
+Os arquivos digitalizados devem ser salvos no cadastro dos pacientes, e podem ser feitos novos registros a partir do próprio sistema, com os modelos de perguntas da ficha utilizada.
+
+O sistema deve ter 3 níveis de acesso, o aluno só pode ter acesso ao paciente que ele tá atendendo, o professor tem acesso a todos os alunos e os pacientes que os alunos atendem e o administrador com acesso ilimitado.
+
+O acesso ao login deve ser local.
+
+O sistema deve imprimir ou gerar um pdf dos documentos selecionados.
+
+O sistema deve realizar o cadastro com informações pessoais do paciente.
+
+As sessões devem ficar salvas no paciente e cada sessão é um registro diferente.
+
+No registro das sessões devem ficar registradas o dia e horário, e também deve haver a possibilidade de subir o upload de arquivos com as anotações da sessão. (CKeditor).
+
+O terapeuta pode anexar um arquivo ou registrar separado no prontuário com anotações da sessão para ele mesmo se planejar e o paciente não deve ter acesso a esse campo.
+
+O sistema deve realizar a impressão somente do prontuário da sessão, as anotações do terapeuta não são impressos.
+
+O sistema deve emitir um relatório de presença do paciente com as datas e horarios no último mês por exemplo (por isso fazer as sessões separadas para poder realizar o relatório assim).
+
+O sistema deve avisar enviando uma mensagem, gravando em uma tabela de avisos para o professor do aluno caso o aluno não lance o atendimento no sistema dentro do prazo de 24 ou 48 horas, dizendo que ele está faltando com a atualização.
+
+O sistema deve realizar no acesso do administrador a opção de realizar um relatório de quantos atendimentos foram realizados no semestre (no atendimento, como vai ser individualizado cada atendimento, com a data e hora, pode ser feito um filtro com a data inicial e final para gerar o relatório).

@@ -1,0 +1,100 @@
+Entidades:
+
+Pacientes
+
+Usuários (psicólogos/alunos, professores, administradores)
+
+Sessões
+
+Prontuários
+
+Anotações
+
+ArquivosDigitalizados
+
+Avisos
+
+Relacionamentos e atributos:
+
+Pacientes (id_paciente, nome, data_nascimento, contato, endereço, documentos)
+
+    Relacionamento: Paciente tem muitas Sessões
+    Relacionamento: Paciente tem muitos ArquivosDigitalizados
+
+Usuários (id_usuario, nome, tipo_usuario (psicólogo/aluno, professor, administrador), especialidade, contato, login, senha)
+
+    Relacionamento: Usuário tem muitas Sessões
+    Relacionamento: Usuário (professor) supervisiona muitos Psicólogos/Alunos
+    Relacionamento: Usuário (administrador) tem acesso a tudo
+
+Sessões (id_sessao, id_paciente, id_usuario, data, hora)
+
+    Relacionamento: Sessão gera um Prontuário
+    Relacionamento: Sessão tem muitas Anotações
+    Relacionamento: Sessão tem muitos ArquivosDigitalizados
+
+Prontuários (id_prontuario, id_sessao, descricao)
+
+    Relacionamento: Prontuário pertence a uma Sessão
+
+Anotações (id_anotacao, id_sessao, anotacao)
+
+    Relacionamento: Anotação pertence a uma Sessão
+
+ArquivosDigitalizados (id_arquivo, id_paciente, id_sessao, tipo_documento, data_upload, arquivo)
+
+    Relacionamento: ArquivoDigitalizado pertence a um Paciente ou uma Sessão
+
+Avisos (id_aviso, id_usuario, id_professor, mensagem, data, status)
+
+    Relacionamento: Aviso pertence a um Psicólogo/Aluno e um Professor
+
+Pacientes:
+    - id_paciente (PK)
+    - nome
+    - data_nascimento
+    - contato
+    - endereço
+    - documentos
+
+Usuários:
+    - id_usuario (PK)
+    - nome
+    - tipo_usuario
+    - especialidade
+    - contato
+    - login
+    - senha
+
+Sessões:
+    - id_sessao (PK)
+    - id_paciente (FK)
+    - id_usuario (FK)
+    - data
+    - hora
+
+Prontuários:
+    - id_prontuario (PK)
+    - id_sessao (FK)
+    - descricao
+
+Anotações:
+    - id_anotacao (PK)
+    - id_sessao (FK)
+    - anotacao
+
+ArquivosDigitalizados:
+    - id_arquivo (PK)
+    - id_paciente (FK)
+    - id_sessao (FK)
+    - tipo_documento
+    - data_upload
+    - arquivo
+
+Avisos:
+    - id_aviso (PK)
+    - id_usuario (FK)
+    - id_professor (FK)
+    - mensagem
+    - data
+    - status
