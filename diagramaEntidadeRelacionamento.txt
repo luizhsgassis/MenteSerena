@@ -44,6 +44,7 @@ Anotações (id_anotacao, id_sessao, anotacao)
 ArquivosDigitalizados (id_arquivo, id_paciente, id_sessao, tipo_documento, data_upload, arquivo)
 
     Relacionamento: ArquivoDigitalizado pertence a um Paciente ou uma Sessão
+    Relacionamento: ArquivoDigitalizado tem um usuário aluno/psicólogo
 
 Avisos (id_aviso, id_usuario, id_professor, mensagem, data, status)
 
@@ -86,6 +87,7 @@ Anotações:
 ArquivosDigitalizados:
     - id_arquivo (PK)
     - id_paciente (FK)
+    - id_usuario (FK)
     - id_sessao (FK)
     - tipo_documento
     - data_upload
@@ -94,7 +96,6 @@ ArquivosDigitalizados:
 Avisos:
     - id_aviso (PK)
     - id_usuario (FK)
-    - id_professor (FK)
     - mensagem
     - data
     - status
