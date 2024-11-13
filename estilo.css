@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:wght@400..900&family=Roboto:wght@100;300;400;500;700;900&display=swap');
+
+:root {
+    --primary-color: #373C9E;
+    --off-white: #ECEDF2;
+    --white: #ffffff;
+    --black: #1e1e1e;
+    --shadow: rgba(0, 0, 0, 0.2) 0px 12px 28px 0px, rgba(0, 0, 0, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
+}
+
+body {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    background-color: var(--off-white);
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: var(--black);
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 90%;
+}
+
+h2 {
+    color: var(--black);
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 100%;
+}
+
+h3 {
+    color: var(--black);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 120%;
+}
+
+h4 {
+    color: var(--black);
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 120%;
+}
+
+h5 {
+    color: var(--black);
+    font-size: 1.45rem;
+    font-weight: 500;
+    line-height: 120%;
+}
+
+h6 {
+    color: var(--black);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 120%;
+}
+
+p {
+    color: var(--black);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 165%;
+    transition: all 0.3s ease;
+    margin: 0;
+}
+
+.text_button {
+    color: var(--black);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 100%;
+}
+
+.placeholder {
+    color: var(--black);
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 100%;
+}
+
+.small {
+    color: var(--black);
+    font-size: 0.85rem;
+    font-weight: 300;
+    line-height: 120%;
+}
+
+.caption {
+    color: var(--black);
+    font-size: 0.7rem;
+    font-weight: 400;
+    line-height: 120%;
+}
+
+section {
+    width: 100%;
+    height: auto;
+}
+  
+.container {
+    max-width: 892px;
+    height: 864px;
+    margin: 0 auto;
+    background-color: var(--white);
+}
