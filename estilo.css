@@ -99,6 +99,7 @@ section {
     width: 100%;
     height: auto;
 }
+<<<<<<< HEAD
 
 .login_container {
     max-width: 892px;
@@ -108,12 +109,15 @@ section {
     color: var(--white);
     border-radius: 36px;
 }
+=======
+>>>>>>> bcb9482c86cdf96e2fdaaee839ae0dddb350c102
   
 .container {
     max-width: 892px;
     height: 864px;
     margin: 0 auto;
     background-color: var(--white);
+<<<<<<< HEAD
 }
 
 /* LOGIN */
@@ -147,4 +151,6 @@ section {
     background-color: var(--white);
     padding: 10px 37px;
     border-radius: 12px;
+=======
+>>>>>>> bcb9482c86cdf96e2fdaaee839ae0dddb350c102
 }
