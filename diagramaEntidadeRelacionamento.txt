@@ -51,51 +51,66 @@ Avisos (id_aviso, id_usuario, id_professor, mensagem, data, status)
     Relacionamento: Aviso pertence a um Psicólogo/Aluno e um Professor
 
 Pacientes:
-    - id_paciente (PK)
-    - nome
-    - data_nascimento
-    - contato
-    - endereço
-    - documentos
+    - id_paciente (PK)      (int)
+    - cpf                   (int)
+    - nome                  (varchar(50))
+    - data_nascimento       (date)
+    - genero                (enum)
+    - estado_civil          (enum)
+    - email                 (varchar(50))
+    - telefone              (varchar(11))
+    - contato_emergencia    (varchar(50))
+    - endereço              (varchar(50))
+    - escolaridade          (varchar(20))
+    - ocupacao              (varchar(50))
+    - necessidade_especial  (varchar(20))
 
 Usuários:
-    - id_usuario (PK)
-    - nome
-    - tipo_usuario
-    - especialidade
-    - contato
-    - login
-    - senha
+    - id_usuario (PK)   (int)
+    - cpf               (int)
+    - nome              (varchar(50))
+    - genero            (enum)
+    - data_contratacao  (date)
+    - formacao          (varchar(50))
+    - tipo_usuario      (enum)
+    - especialidade     (varchar(20))
+    - email             (varchar(50))
+    - telefone          (varchar(11))
+    - login             (varchar(20))
+    - senha             (varchar(20))
+    - ativo             (boolean)
 
 Sessões:
-    - id_sessao (PK)
-    - id_paciente (FK)
-    - id_usuario (FK)
-    - data
-    - hora
+    - id_sessao (PK)        (int)
+    - id_prontuario (FK)    (int)
+    - id_paciente (FK)      (int)
+    - id_usuario (FK)       (int)
+    - data                  (date)
+    - registro_sessao       (text)
+    - anotacoes             (text)
 
-Prontuários:
-    - id_prontuario (PK)
-    - id_sessao (FK)
-    - descricao
-
-Anotações:
-    - id_anotacao (PK)
-    - id_sessao (FK)
-    - anotacao
+Prontuário:
+    - id_prontuario (PK)    (int)
+    - id_paciente (FK)      (int)
+    - id_usuario (FK)       (int)
+    - data_abertura         (date)
+    - historico_familiar    (text)
+    - historico_social      (text)
+    - consideracoes_finais  (text)
 
 ArquivosDigitalizados:
-    - id_arquivo (PK)
-    - id_paciente (FK)
-    - id_usuario (FK)
-    - id_sessao (FK)
-    - tipo_documento
-    - data_upload
-    - arquivo
+    - id_arquivo (PK)   (int)
+    - id_paciente (FK)  (int)
+    - id_usuario (FK)   (int)
+    - id_sessao (FK)    (int)
+    - tipo_documento    (varchar(20))
+    - data_upload       (date)
+    - arquivo           (longblob)
 
 Avisos:
-    - id_aviso (PK)
-    - id_usuario (FK)
-    - mensagem
-    - data
-    - status
+    - id_aviso (PK)     (int)
+    - id_sessao (FK)    (int)
+    - id_usuario (FK)   (int)
+    - mensagem          (text)
+    - data              (date)
+    - status            (enum)
