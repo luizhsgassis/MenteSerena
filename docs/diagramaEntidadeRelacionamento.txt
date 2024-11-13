@@ -1,0 +1,89 @@
+Entidades:
+Pacientes
+
+Usuários (psicólogos/alunos, professores, administradores)
+
+Sessões
+
+Prontuários
+
+ArquivosDigitalizados
+
+Avisos
+
+Pacientes:
+    - id_paciente           (int, PK, AUTO_INCREMENT)
+    - cpf                   (int)
+    - nome                  (varchar(50))
+    - data_nascimento       (date)
+    - genero                (enum('Masculino', 'Feminino', 'Outro'))
+    - estado_civil          (enum('Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)'))
+    - email                 (varchar(50))
+    - telefone              (varchar(11))
+    - contato_emergencia    (varchar(50))
+    - endereço              (varchar(50))
+    - escolaridade          (varchar(20))
+    - ocupacao              (varchar(50))
+    - necessidade_especial  (varchar(20))
+    **Relacionamento**: Paciente tem muitas Sessões
+    **Relacionamento**: Paciente tem muitos ArquivosDigitalizados
+
+Usuários:
+    - id_usuario        (int, PK, AUTO_INCREMENT)
+    - cpf               (int)
+    - nome              (varchar(50))
+    - genero            (enum('Masculino', 'Feminino', 'Outro'))
+    - data_contratacao  (date)
+    - formacao          (varchar(50))
+    - tipo_usuario      (enum('psicólogo/aluno', 'professor', 'administrador'))
+    - especialidade     (varchar(20))
+    - email             (varchar(50))
+    - telefone          (varchar(11))
+    - login             (varchar(20))
+    - senha             (varchar(20))
+    - ativo             (boolean)
+    **Relacionamento**: Usuário tem muitas Sessões
+    **Relacionamento**: Usuário (professor) supervisiona muitos Psicólogos/Alunos
+    **Relacionamento**: Usuário (administrador) tem acesso a tudo
+
+Sessões:
+    - id_sessao             (int, PK, AUTO_INCREMENT)
+    - id_prontuario         (int, FK)
+    - id_paciente           (int, FK)
+    - id_usuario            (int, FK)
+    - data                  (date)
+    - registro_sessao       (text)
+    - anotacoes             (text)
+    **Relacionamento**: Sessão tem muitos ArquivosDigitalizados
+    **Relacionamento**: Sessão tem muitos Avisos
+
+Prontuário:
+    - id_prontuario         (int, PK, AUTO_INCREMENT)
+    - id_paciente           (int, FK)
+    - id_usuario            (int, FK)
+    - data_abertura         (date)
+    - historico_familiar    (text)
+    - historico_social      (text)
+    - consideracoes_finais  (text)
+    **Relacionamento**: Prontuário tem muitas Sessões
+
+ArquivosDigitalizados:
+    - id_arquivo        (int, PK, AUTO_INCREMENT)
+    - id_paciente       (int, FK)
+    - id_usuario        (int, FK)
+    - id_sessao         (int, FK)
+    - tipo_documento    (varchar(20))
+    - data_upload       (date)
+    - arquivo           (longblob)
+    **Relacionamento**: ArquivoDigitalizado pertence a um Paciente ou uma Sessão
+    **Relacionamento**: ArquivoDigitalizado tem um usuário (aluno/psicólogo)
+
+Avisos:
+    - id_aviso          (int, PK, AUTO_INCREMENT)
+    - id_sessao         (int, FK)
+    - id_usuario        (int, FK)
+    - mensagem          (text)
+    - data              (date)
+    - status            (enum('pendente', 'resolvido'))
+    **Relacionamento**: Aviso pertence a uma Sessão
+    **Relacionamento**: Aviso pertence a um Psicólogo/Aluno e um Professor
