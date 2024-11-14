@@ -141,10 +141,11 @@ section {
     border: none;
 }
 
-.login_form a {
+.login_button {
     text-decoration: none;
     color: var(--primary-color);
     background-color: var(--white);
     padding: 10px 37px;
     border-radius: 12px;
+    border: none;
 }

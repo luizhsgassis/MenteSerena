@@ -1,3 +1,35 @@
+<?php
+include('config.php');
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['botao']) && $_POST['botao'] == "Entrar") {
+  $login = $_POST['login'];
+  $senha = $_POST['senha'];
+
+  $query = "SELECT * FROM Usuarios WHERE login = ?";
+  $stmt = mysqli_prepare($conn, $query);
+  mysqli_stmt_bind_param($stmt, "s", $login);
+  mysqli_stmt_execute($stmt);
+  $result = mysqli_stmt_get_result($stmt);
+
+  if ($coluna = mysqli_fetch_array($result)) {
+    if (password_verify($senha, $coluna['senha'])) {
+      $_SESSION["id_usuario"] = $coluna["id_usuario"];
+      $_SESSION["nome_usuario"] = $coluna["nome"];
+      $_SESSION["UsuarioNivel"] = $coluna["tipo_usuario"];
+      $niv = $coluna['tipo_usuario'];
+
+      header("Location: /MenteSerena-master/php/pacientes.php");
+      exit;
+    } else {
+      echo "Login ou senha incorretos.";
+    }
+  } else {
+    echo "Login ou senha incorretos.";
+  }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -11,7 +43,7 @@
             <div class="login_logo">
                 <h3>MenteSerena</h3>
             </div>
-            <form class="login_form" action="login.php" method="post">
+            <form class="login_form" action="" method="post">
                 <div>
                     <label for="login">Login:</label>
                     <input type="text" name="login" id="login" required>
@@ -20,7 +52,7 @@
                     <label for="senha">Senha:</label>
                     <input type="password" name="senha" id="senha" required>
                 </div>
-                <a href="#" type="submit">Entrar</a>
+                <button class="login_button" type="submit" name="botao" value="Entrar">Entrar</button>
             </form>
         </div>
     </section>

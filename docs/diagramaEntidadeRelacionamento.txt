@@ -13,7 +13,7 @@ Avisos
 
 Pacientes:
     - id_paciente           (int, PK, AUTO_INCREMENT)
-    - cpf                   (int)
+    - cpf                   (varchar(11))
     - nome                  (varchar(50))
     - data_nascimento       (date)
     - genero                (enum('Masculino', 'Feminino', 'Outro'))
@@ -30,8 +30,9 @@ Pacientes:
 
 Usuários:
     - id_usuario        (int, PK, AUTO_INCREMENT)
-    - cpf               (int)
+    - cpf               (varchar(11))
     - nome              (varchar(50))
+    - data_nascimento   (date)
     - genero            (enum('Masculino', 'Feminino', 'Outro'))
     - data_contratacao  (date)
     - formacao          (varchar(50))
