@@ -11,6 +11,7 @@ if (isset($_SESSION['id_usuario'])) {
 
   // Define a página atual
   $paginaAtual = basename($_SERVER['PHP_SELF']);
+  $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : '';
 
   // Define o HTML da sidebar
   $sidebar = '
@@ -21,102 +22,96 @@ if (isset($_SESSION['id_usuario'])) {
   // Adiciona os botões de acordo com o nível de acesso
   if ($nivelAcesso == ADMINISTRADOR) {
     $sidebar .= '
-      <li class="' . ($paginaAtual == 'pacientes.php' ? 'active' : '') . '">
-        <a href="pacientes.php">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'pacientes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=pacientes">
           <img src="../images/pacientes.svg" alt="Pacientes">
           <span>Pacientes</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'documentos' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=documentos">
           <img src="../images/documentos.svg" alt="Documentos">
           <span>Documentos</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'notificacoes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=notificacoes">
           <img src="../images/notificacoes.svg" alt="Notificações">
           <span>Notificações</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'alunos' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=alunos">
           <img src="../images/alunos.svg" alt="Alunos">
           <span>Alunos</span>
         </a>
       </li>
-      <li class="' . ($paginaAtual == 'professores.php' ? 'active' : '') . '">
-        <a href="professores.php">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'professores' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=professores">
           <img src="../images/professores.svg" alt="Professores">
           <span>Professores</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'sessoes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=sessoes">
           <img src="../images/sessoes.svg" alt="Sessões">
           <span>Sessões</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'relatorios' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=relatorios">
           <img src="../images/relatorios.svg" alt="Relatórios">
           <span>Relatórios</span>
         </a>
       </li>';
   } else if ($nivelAcesso == PROFESSOR) {
     $sidebar .= '
-      <li class="' . ($paginaAtual == 'pacientes.php' ? 'active' : '') . '">
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'pacientes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=pacientes">
           <img src="../images/pacientes.svg" alt="Pacientes">
           <span>Pacientes</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'documentos' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=documentos">
           <img src="../images/documentos.svg" alt="Documentos">
           <span>Documentos</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'notificacoes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=notificacoes">
           <img src="../images/notificacoes.svg" alt="Notificações">
           <span>Notificações</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'alunos' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=alunos">
           <img src="../images/alunos.svg" alt="Alunos">
           <span>Alunos</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'sessoes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=sessoes">
           <img src="../images/sessoes.svg" alt="Sessões">
           <span>Sessões</span>
-        </a>
-      </li>
-      <li>
-        <a href="#">
-          <img src="../images/relatorios.svg" alt="Relatórios">
-          <span>Relatórios</span>
         </a>
       </li>';
   } else if ($nivelAcesso == ALUNO) {
     $sidebar .= '
-      <li class="' . ($paginaAtual == 'pacientes.php' ? 'active' : '') . '">
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'pacientes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=pacientes">
           <img src="../images/pacientes.svg" alt="Pacientes">
           <span>Pacientes</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'documentos' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=documentos">
           <img src="../images/documentos.svg" alt="Documentos">
           <span>Documentos</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'notificacoes' ? 'active' : '') . '">
+        <a href="/MenteSerena-master/php/mainContent.php?tipo=notificacoes">
           <img src="../images/notificacoes.svg" alt="Notificações">
           <span>Notificações</span>
         </a>

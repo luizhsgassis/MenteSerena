@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['botao']) && $_POST['bo
       $_SESSION["nome_usuario"] = $coluna["nome"];
       $_SESSION["UsuarioNivel"] = $coluna["tipo_usuario"];
 
-      header("Location: /MenteSerena-master/php/pacientes.php");
+      header("Location: /MenteSerena-master/php/mainContent.php?tipo=pacientes");
       exit;
     } else {
       echo "Login ou senha incorretos.";
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['botao']) && $_POST['bo
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="./estilo.css">
+    <link rel="stylesheet" href="estilo.css">
     <title>MenteSerena</title>
 </head>
 <body>
