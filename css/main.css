@@ -7,7 +7,7 @@
 
 .body_section main {
     width: 100%;
-    max-width: 892px;
+    max-width: 60vw;
     height: auto;
     padding: 30px;
     padding-bottom: 50px;
@@ -19,15 +19,29 @@
 
 .body_section main .main_title h2 {
     color: var(--primary-color);
-    margin: 0 0 50px;
+    margin: 0 0 30px;
 }
 
+/* Tabela */
 table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
-    font-size: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 100%;
     text-align: left;
+    border-radius: 36px;
+    overflow: hidden;
+}
+
+/* Adiciona um contêiner para a tabela com rolagem */
+.table-container {
+    max-height: 50vh;
+    max-width: 60vw;
+    overflow-y: auto;
+    overflow-x: auto;
+    border-radius: 36px;
 }
 
 table th, table td {
@@ -38,6 +52,9 @@ table th, table td {
 table th {
     background-color: var(--primary-color);
     color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 table tr:nth-child(even) {
@@ -46,4 +63,30 @@ table tr:nth-child(even) {
 
 table tr:hover {
     background-color: #ddd;
+}
+
+/* Adiciona border-radius aos cantos da tabela */
+table thead th:first-child {
+    border-top-left-radius: 36px;
+}
+
+table thead th:last-child {
+    border-top-right-radius: 36px;
+}
+
+table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 36px;
+}
+
+table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 36px;
+}
+
+.botao_azul {
+    text-decoration: none;
+    color: var(--white);
+    background-color: var(--primary-color);
+    padding: 10px 37px;
+    border-radius: 12px;
+    border: none;
 }

@@ -22,7 +22,7 @@ if (isset($_SESSION['id_usuario'])) {
   if ($nivelAcesso == ADMINISTRADOR) {
     $sidebar .= '
       <li class="' . ($paginaAtual == 'pacientes.php' ? 'active' : '') . '">
-        <a href="#">
+        <a href="pacientes.php">
           <img src="../images/pacientes.svg" alt="Pacientes">
           <span>Pacientes</span>
         </a>
@@ -45,8 +45,8 @@ if (isset($_SESSION['id_usuario'])) {
           <span>Alunos</span>
         </a>
       </li>
-      <li>
-        <a href="#">
+      <li class="' . ($paginaAtual == 'professores.php' ? 'active' : '') . '">
+        <a href="professores.php">
           <img src="../images/professores.svg" alt="Professores">
           <span>Professores</span>
         </a>
@@ -138,7 +138,7 @@ if (isset($_SESSION['id_usuario'])) {
             <img src="../images/setting.svg" alt="Configurações">
             <span>Configurações</span>
           </a>
-          <a href="#">
+          <a href="logout.php">
             <img src="../images/exit.svg" alt="Sair">
             <span>Sair</span>
           </a>
