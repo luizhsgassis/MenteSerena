@@ -46,6 +46,7 @@ if (isset($_SESSION['id_usuario'])) {
     $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'notificacoes', '/MenteSerena-master/php/mainContent.php?tipo=notificacoes', '../images/notificacoes.svg', 'Notificações');
     $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'alunos', '/MenteSerena-master/php/mainContent.php?tipo=alunos', '../images/alunos.svg', 'Alunos');
     $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'sessoes', '/MenteSerena-master/php/mainContent.php?tipo=sessoes', '../images/sessoes.svg', 'Sessões');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'relatorios', '/MenteSerena-master/php/mainContent.php?tipo=relatorios', '../images/relatorios.svg', 'Relatórios');
   } else if ($nivelAcesso == ALUNO) {
     $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'pacientes', '/MenteSerena-master/php/mainContent.php?tipo=pacientes', '../images/pacientes.svg', 'Pacientes');
     $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'documentos', '/MenteSerena-master/php/mainContent.php?tipo=documentos', '../images/documentos.svg', 'Documentos');

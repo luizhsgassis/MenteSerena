@@ -19,7 +19,7 @@ switch ($tipo) {
     case 'professores':
         // Verifica se o usuário é administrador
         if ($nivelAcesso != 'administrador') {
-            header("Location: /MenteSerena-master/index.php");
+            header("Location: /MenteSerena-master/php/logout.php");
             exit;
         }
         $query = "SELECT * FROM Usuarios WHERE tipo_usuario = 'professor'";
@@ -38,7 +38,7 @@ switch ($tipo) {
     case 'alunos':
         // Verifica se o usuário é administrador ou professor
         if ($nivelAcesso == 'aluno') {
-            header("Location: /MenteSerena-master/index.php");
+            header("Location: /MenteSerena-master/php/logout.php");
             exit;
         }
         $query = "SELECT * FROM Usuarios WHERE tipo_usuario = 'aluno'";
@@ -161,7 +161,7 @@ $result = mysqli_query($conn, $query);
                 <!-- Botão para cadastrar novo registro, exceto para notificações -->
                 <?php if ($tipo != 'notificacoes'): ?>
                 <div class="button-container">
-                    <a href="cadastrar<?php echo ucfirst($tipo); ?>.php" class="botao_azul text_button">Cadastrar <?php echo ucfirst($tipo); ?></a>
+                    <a href="<?php echo $tipo == 'sessoes' ? 'cadastrarSessoes.php' : 'cadastrar' . ucfirst($tipo) . '.php'; ?>" class="botao_azul text_button">Cadastrar <?php echo ucfirst($tipo); ?></a>
                 </div>
                 <?php endif; ?>
             </div>

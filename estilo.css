@@ -6,6 +6,7 @@
     --off-white: #ECEDF2;
     --white: #ffffff;
     --black: #1e1e1e;
+    --light-gray: #BBC8D4;
     --shadow: rgba(0, 0, 0, 0.2) 0px 12px 28px 0px, rgba(0, 0, 0, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
 }
 
@@ -185,8 +186,46 @@ ul {
     border-radius: 8px;
     box-shadow: var(--shadow);
     transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
 }
 
 .botao_azul:hover {
     background-color: var(--darker-primary-color);
+}
+
+.main_form select,
+.main_form input,
+.main_form textarea {
+    max-width: 320px;
+    width: 100%;
+    height: 36px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 100%;
+    border-radius: 8px;
+    border: 2px solid var(--light-gray);
+}
+
+.main_form textarea {
+    min-width: 100%;
+    height: 150px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 100%;
+    border-radius: 8px;
+    border: 2px solid var(--light-gray);
+}
+
+.main_form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 100%;
+    color: #1e1e1e;
+}
+
+.main_form .form_text_area {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
 }
