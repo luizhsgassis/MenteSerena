@@ -128,9 +128,9 @@ if (isset($_SESSION['id_usuario'])) {
       <div class="menu">
         <div class="user">
           <img src="../images/user.svg" alt="Usuário">
-          <div>
-            <span>' . $_SESSION['nome_usuario'] . '</span>
-            <span>' . $_SESSION['UsuarioNivel'] . '</span>
+          <div class="user_name">
+            <span class="placeholder">' . $_SESSION['nome_usuario'] . '</span>
+            <span class="caption">' . $_SESSION['UsuarioNivel'] . '</span>
           </div>
         </div>
         <div class="configuracoes">

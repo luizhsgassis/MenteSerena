@@ -57,7 +57,7 @@ span {
 .sidebar .active a,
 .sidebar .active img {
     opacity: 1;
-    color: var(--white);
+    color: #fff;
 }
 
 .sidebar img {
@@ -90,8 +90,19 @@ span {
 .user {
     display: flex;
     align-items: center;
+    margin-bottom: 30px;
+}
+
+.user .user_name {
+    display: flex;
+    flex-direction: column;
 }
 
 .configuracoes {
     display: flex;
+    gap: 10px;
+}
+
+.configuracoes a {
+    padding: 0;
 }
