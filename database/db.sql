@@ -25,7 +25,7 @@ CREATE TABLE Usuarios (
     genero ENUM('Masculino', 'Feminino', 'Outro') NOT NULL,
     data_contratacao DATE NOT NULL,
     formacao VARCHAR(50) NOT NULL,
-    tipo_usuario ENUM('psicólogo/aluno', 'professor', 'administrador') NOT NULL,
+    tipo_usuario ENUM('aluno', 'professor', 'administrador') NOT NULL,
     especialidade VARCHAR(20),
     email VARCHAR(50) NOT NULL,
     telefone VARCHAR(11) NOT NULL,
@@ -86,3 +86,11 @@ CREATE TABLE Avisos (
 -- Inserir usuário administrador
 INSERT INTO Usuarios (cpf, nome, data_nascimento, genero, data_contratacao, formacao, tipo_usuario, especialidade, email, telefone, login, senha, ativo)
 VALUES ('00000000000', 'Administrador', '1980-01-01', 'Masculino', '2023-01-01', 'Administração', 'administrador', NULL, 'admin@example.com', '0000000000', 'admin', '$2y$10$BbYVMgh.KH1NN.h4fWbAYOeX5OJ0.RA1AdXnJFg.CQk9JFSnTDJdS', 1);
+
+-- Inserir usuário professor
+INSERT INTO Usuarios (cpf, nome, data_nascimento, genero, data_contratacao, formacao, tipo_usuario, especialidade, email, telefone, login, senha, ativo)
+VALUES ('11111111111', 'Professor', '1985-05-15', 'Masculino', '2023-01-01', 'Educação', 'professor', 'Matemática', 'professor@example.com', '1111111111', 'professor', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1);
+
+-- Inserir usuário aluno
+INSERT INTO Usuarios (cpf, nome, data_nascimento, genero, data_contratacao, formacao, tipo_usuario, especialidade, email, telefone, login, senha, ativo)
+VALUES ('22222222222', 'Aluno', '1995-10-20', 'Feminino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'aluno@example.com', '2222222222', 'aluno', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1);

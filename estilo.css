@@ -67,6 +67,12 @@ p {
     margin: 0;
 }
 
+span {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 100%;
+}
+
 .text_button {
     color: var(--black);
     font-size: 1rem;
@@ -99,15 +105,6 @@ section {
     width: 100%;
     height: auto;
 }
-
-.login_container {
-    max-width: 892px;
-    height: auto;
-    margin: 0 auto;
-    background-color: var(--primary-color);
-    color: var(--white);
-    border-radius: 36px;
-}
   
 .container {
     max-width: 892px;
@@ -116,7 +113,20 @@ section {
     background-color: var(--white);
 }
 
-/* LOGIN */
+ul {
+    list-style: none;
+}
+
+/* Login */
+.login_container {
+    max-width: 892px;
+    height: auto;
+    margin: 0 auto;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-radius: 36px;
+}
+
 .login_logo h3 {
     text-align: center;
     padding-top: 30px;

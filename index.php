@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['botao']) && $_POST['bo
       $_SESSION["id_usuario"] = $coluna["id_usuario"];
       $_SESSION["nome_usuario"] = $coluna["nome"];
       $_SESSION["UsuarioNivel"] = $coluna["tipo_usuario"];
-      $niv = $coluna['tipo_usuario'];
 
       header("Location: /MenteSerena-master/php/pacientes.php");
       exit;
