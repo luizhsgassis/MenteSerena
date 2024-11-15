@@ -11,7 +11,19 @@ if (isset($_SESSION['id_usuario'])) {
 
   // Define a página atual
   $paginaAtual = basename($_SERVER['PHP_SELF']);
-  $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : '';
+  $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'pacientes'; // Define 'pacientes' como padrão
+
+  // Função para gerar itens da sidebar
+  function gerarItemSidebar($paginaAtual, $tipo, $tipoPagina, $url, $imgSrc, $texto) {
+    $activeClass = ($paginaAtual == 'mainContent.php' && $tipo == $tipoPagina) ? 'active' : '';
+    return '
+      <li class="' . $activeClass . '">
+        <a href="' . $url . '">
+          <img src="' . $imgSrc . '" alt="' . $texto . '">
+          <span>' . $texto . '</span>
+        </a>
+      </li>';
+  }
 
   // Define o HTML da sidebar
   $sidebar = '
@@ -21,101 +33,24 @@ if (isset($_SESSION['id_usuario'])) {
 
   // Adiciona os botões de acordo com o nível de acesso
   if ($nivelAcesso == ADMINISTRADOR) {
-    $sidebar .= '
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'pacientes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=pacientes">
-          <img src="../images/pacientes.svg" alt="Pacientes">
-          <span>Pacientes</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'documentos' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=documentos">
-          <img src="../images/documentos.svg" alt="Documentos">
-          <span>Documentos</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'notificacoes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=notificacoes">
-          <img src="../images/notificacoes.svg" alt="Notificações">
-          <span>Notificações</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'alunos' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=alunos">
-          <img src="../images/alunos.svg" alt="Alunos">
-          <span>Alunos</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'professores' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=professores">
-          <img src="../images/professores.svg" alt="Professores">
-          <span>Professores</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'sessoes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=sessoes">
-          <img src="../images/sessoes.svg" alt="Sessões">
-          <span>Sessões</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'relatorios' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=relatorios">
-          <img src="../images/relatorios.svg" alt="Relatórios">
-          <span>Relatórios</span>
-        </a>
-      </li>';
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'pacientes', '/MenteSerena-master/php/mainContent.php?tipo=pacientes', '../images/pacientes.svg', 'Pacientes');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'documentos', '/MenteSerena-master/php/mainContent.php?tipo=documentos', '../images/documentos.svg', 'Documentos');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'notificacoes', '/MenteSerena-master/php/mainContent.php?tipo=notificacoes', '../images/notificacoes.svg', 'Notificações');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'alunos', '/MenteSerena-master/php/mainContent.php?tipo=alunos', '../images/alunos.svg', 'Alunos');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'professores', '/MenteSerena-master/php/mainContent.php?tipo=professores', '../images/professores.svg', 'Professores');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'sessoes', '/MenteSerena-master/php/mainContent.php?tipo=sessoes', '../images/sessoes.svg', 'Sessões');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'relatorios', '/MenteSerena-master/php/mainContent.php?tipo=relatorios', '../images/relatorios.svg', 'Relatórios');
   } else if ($nivelAcesso == PROFESSOR) {
-    $sidebar .= '
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'pacientes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=pacientes">
-          <img src="../images/pacientes.svg" alt="Pacientes">
-          <span>Pacientes</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'documentos' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=documentos">
-          <img src="../images/documentos.svg" alt="Documentos">
-          <span>Documentos</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'notificacoes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=notificacoes">
-          <img src="../images/notificacoes.svg" alt="Notificações">
-          <span>Notificações</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'alunos' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=alunos">
-          <img src="../images/alunos.svg" alt="Alunos">
-          <span>Alunos</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'sessoes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=sessoes">
-          <img src="../images/sessoes.svg" alt="Sessões">
-          <span>Sessões</span>
-        </a>
-      </li>';
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'pacientes', '/MenteSerena-master/php/mainContent.php?tipo=pacientes', '../images/pacientes.svg', 'Pacientes');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'documentos', '/MenteSerena-master/php/mainContent.php?tipo=documentos', '../images/documentos.svg', 'Documentos');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'notificacoes', '/MenteSerena-master/php/mainContent.php?tipo=notificacoes', '../images/notificacoes.svg', 'Notificações');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'alunos', '/MenteSerena-master/php/mainContent.php?tipo=alunos', '../images/alunos.svg', 'Alunos');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'sessoes', '/MenteSerena-master/php/mainContent.php?tipo=sessoes', '../images/sessoes.svg', 'Sessões');
   } else if ($nivelAcesso == ALUNO) {
-    $sidebar .= '
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'pacientes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=pacientes">
-          <img src="../images/pacientes.svg" alt="Pacientes">
-          <span>Pacientes</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'documentos' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=documentos">
-          <img src="../images/documentos.svg" alt="Documentos">
-          <span>Documentos</span>
-        </a>
-      </li>
-      <li class="' . ($paginaAtual == 'mainContent.php' && $tipo == 'notificacoes' ? 'active' : '') . '">
-        <a href="/MenteSerena-master/php/mainContent.php?tipo=notificacoes">
-          <img src="../images/notificacoes.svg" alt="Notificações">
-          <span>Notificações</span>
-        </a>
-      </li>';
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'pacientes', '/MenteSerena-master/php/mainContent.php?tipo=pacientes', '../images/pacientes.svg', 'Pacientes');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'documentos', '/MenteSerena-master/php/mainContent.php?tipo=documentos', '../images/documentos.svg', 'Documentos');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'notificacoes', '/MenteSerena-master/php/mainContent.php?tipo=notificacoes', '../images/notificacoes.svg', 'Notificações');
+    $sidebar .= gerarItemSidebar($paginaAtual, $tipo, 'sessoes', '/MenteSerena-master/php/mainContent.php?tipo=sessoes', '../images/sessoes.svg', 'Sessões');
   }
 
   $sidebar .= '

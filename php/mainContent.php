@@ -12,9 +12,16 @@ include('../config.php');
 // Obtém o tipo de conteúdo a ser exibido
 $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'pacientes';
 
-// Define a consulta SQL com base no tipo de conteúdo
+// Verifica o nível de acesso do usuário
+$nivelAcesso = $_SESSION['UsuarioNivel'];
+
 switch ($tipo) {
     case 'professores':
+        // Verifica se o usuário é administrador
+        if ($nivelAcesso != 'administrador') {
+            header("Location: /MenteSerena-master/index.php");
+            exit;
+        }
         $query = "SELECT * FROM Usuarios WHERE tipo_usuario = 'professor'";
         $titulo = "Professores";
         $colunas = ['ID', 'CPF', 'Nome', 'Data de Nascimento', 'Gênero', 'Email', 'Telefone'];
@@ -29,6 +36,11 @@ switch ($tipo) {
         ];
         break;
     case 'alunos':
+        // Verifica se o usuário é administrador ou professor
+        if ($nivelAcesso == 'aluno') {
+            header("Location: /MenteSerena-master/index.php");
+            exit;
+        }
         $query = "SELECT * FROM Usuarios WHERE tipo_usuario = 'aluno'";
         $titulo = "Alunos";
         $colunas = ['ID', 'CPF', 'Nome', 'Data de Nascimento', 'Gênero', 'Email', 'Telefone'];
@@ -149,7 +161,7 @@ $result = mysqli_query($conn, $query);
                 <!-- Botão para cadastrar novo registro, exceto para notificações -->
                 <?php if ($tipo != 'notificacoes'): ?>
                 <div class="button-container">
-                    <a href="cadastrar<?php echo ucfirst($tipo); ?>.php" class="botao_azul">Cadastrar <?php echo ucfirst($tipo); ?></a>
+                    <a href="cadastrar<?php echo ucfirst($tipo); ?>.php" class="botao_azul text_button">Cadastrar <?php echo ucfirst($tipo); ?></a>
                 </div>
                 <?php endif; ?>
             </div>
