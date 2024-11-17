@@ -55,14 +55,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $especialidade = !empty($especialidade) ? $especialidade : NULL;
 
         $query = "INSERT INTO Usuarios (cpf, nome, data_nascimento, genero, data_contratacao, formacao, especialidade, email, telefone, login, senha, tipo_usuario, ativo) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'aluno', 1)";
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'professor', 1)";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "sssssssssss", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $loginTemporario, $senhaHash);
         
         if (mysqli_stmt_execute($stmt)) {
-            $sucesso_cadastro = "Aluno cadastrado com sucesso!";
+            $sucesso_cadastro = "Professor cadastrado com sucesso!";
         } else {
-            $erro_cadastro = "Erro ao cadastrar aluno: " . mysqli_error($conn);
+            $erro_cadastro = "Erro ao cadastrar professor: " . mysqli_error($conn);
         }
     }
 }
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Cadastrar Aluno</title>
+  <title>Cadastrar Professor</title>
   <link rel="stylesheet" href="../estilo.css">
   <link rel="stylesheet" href="../css/sidebar.css">
   <link rel="stylesheet" href="../css/mainContent.css">
@@ -135,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Inclui o conteúdo de sidebar.php -->
     <?php include('sidebar.php'); ?>
     <main>
-      <div class="main_title"><h2>Cadastrar Aluno</h2></div>
+      <div class="main_title"><h2>Cadastrar Professor</h2></div>
       <div class="content">
         <?php if (!empty($erro_cadastro)): ?>
           <div class="error"><?php echo $erro_cadastro; ?></div>
@@ -143,7 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php if (!empty($sucesso_cadastro)): ?>
           <div class="success"><?php echo $sucesso_cadastro; ?></div>
         <?php endif; ?>
-        <form class="main_form" action="cadastrarAlunos.php" method="post">
+        <form class="main_form" action="cadastrarProfessores.php" method="post">
           <div class="form_group">
             <div class="form_input">
               <label for="cpf">CPF:</label>

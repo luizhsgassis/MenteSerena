@@ -1,17 +1,78 @@
 <?php
 session_start();
 
+include('../config.php');
+include('functions.php');
+
 // Verifica se o usuário está logado
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: /MenteSerena-master/index.php");
     exit;
 }
 
-include('../config.php');
+$erro_cadastro = '';
+$sucesso_cadastro = '';
+
+// Obtém o ID do aluno logado
+$idAlunoLogado = $_SESSION['id_usuario'];
+$nomeAlunoLogado = $_SESSION['nome_usuario'];
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $idPaciente = $_POST["paciente"];
+    $idAluno = $_POST["usuario_aluno"];
+    $idProfessor = $_POST["usuario_professor"];
+    $data = $_POST["data"];
+    $registroSessao = $_POST["registro_sessao"];
+    $anotacoes = $_POST["anotacoes"];
+    $idUsuario = $_SESSION['id_usuario'];
+
+    // Validações
+    if (empty($idPaciente) || empty($idAluno) || empty($idProfessor) || empty($data) || empty($registroSessao)) {
+        $erro_cadastro = "Por favor, preencha todos os campos obrigatórios.";
+    } elseif (!validateDate($data)) {
+        $erro_cadastro = "Por favor, preencha uma data válida.";
+    } else {
+        // Inserir dados na tabela Sessoes
+        $querySessao = "INSERT INTO Sessoes (id_prontuario, id_paciente, id_usuario, data, registro_sessao, anotacoes) VALUES (NULL, ?, ?, ?, ?, ?)";
+        $stmtSessao = mysqli_prepare($conn, $querySessao);
+        mysqli_stmt_bind_param($stmtSessao, "iiiss", $idPaciente, $idUsuario, $data, $registroSessao, $anotacoes);
+
+        if (mysqli_stmt_execute($stmtSessao)) {
+            $idSessao = mysqli_insert_id($conn);
+            $sucesso_cadastro = "Sessão cadastrada com sucesso!";
+
+            // Lidar com o upload do arquivo
+            if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] == UPLOAD_ERR_OK) {
+                $arquivoTmp = $_FILES['arquivo']['tmp_name'];
+                $arquivoNome = $_FILES['arquivo']['name'];
+                $arquivoTipo = $_FILES['arquivo']['type'];
+                $arquivoData = date('Y-m-d');
+                $arquivoConteudo = file_get_contents($arquivoTmp);
+
+                // Inserir dados na tabela ArquivosDigitalizados
+                $queryArquivo = "INSERT INTO ArquivosDigitalizados (id_paciente, id_usuario, id_sessao, tipo_documento, data_upload, arquivo) VALUES (?, ?, ?, ?, ?, ?)";
+                $stmtArquivo = mysqli_prepare($conn, $queryArquivo);
+                mysqli_stmt_bind_param($stmtArquivo, "iiisss", $idPaciente, $idUsuario, $idSessao, $arquivoTipo, $arquivoData, $arquivoConteudo);
+
+                if (mysqli_stmt_execute($stmtArquivo)) {
+                    $sucesso_cadastro .= " Arquivo anexado com sucesso!";
+                } else {
+                    $erro_cadastro = "Erro ao anexar o arquivo: " . mysqli_error($conn);
+                }
+            }
+        } else {
+            $erro_cadastro = "Erro ao cadastrar sessão: " . mysqli_error($conn);
+        }
+    }
+}
 
 // Consulta para obter a lista de pacientes
 $queryPacientes = "SELECT id_paciente, nome FROM Pacientes";
 $resultPacientes = mysqli_query($conn, $queryPacientes);
+
+// Consulta para obter a lista de professores
+$queryProfessores = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'professor'";
+$resultProfessores = mysqli_query($conn, $queryProfessores);
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +85,28 @@ $resultPacientes = mysqli_query($conn, $queryPacientes);
     <link rel="stylesheet" href="../css/mainContent.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validação da data
+            document.getElementById('data').addEventListener('blur', function() {
+                var data = this.value;
+                var dataError = document.getElementById('dataError');
+                if (!isValidDate(data)) {
+                    dataError.textContent = 'Por favor, preencha uma data válida.';
+                } else {
+                    dataError.textContent = '';
+                }
+            });
+
+            // Função para validar a data
+            function isValidDate(dateString) {
+                var regEx = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateString.match(regEx)) return false;  // Formato inválido
+                var d = new Date(dateString);
+                var dNum = d.getTime();
+                if (!dNum && dNum !== 0) return false; // Data inválida
+                return d.toISOString().slice(0, 10) === dateString;
+            }
+
             $('#paciente').change(function() {
                 var pacienteId = $(this).val();
                 if (pacienteId) {
@@ -69,45 +151,70 @@ $resultPacientes = mysqli_query($conn, $queryPacientes);
         <?php include('sidebar.php'); ?>
         <main>
             <div class="main_title"><h2>Cadastrar Sessão</h2></div>
-
-            <form class="main_form" action="cadastrarSessoes.php" method="post">
-                <div>
-                    <label for="paciente">Paciente:</label>
-                    <select name="paciente" id="paciente" required>
-                        <option value="">Selecione um paciente</option>
-                        <?php
-                        while ($row = mysqli_fetch_assoc($resultPacientes)) {
-                            echo '<option value="' . $row['id_paciente'] . '">' . $row['nome'] . '</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="usuario_aluno">Aluno:</label>
-                    <select name="usuario_aluno" id="usuario_aluno" disabled required>
-                        <option value="">Selecione um aluno</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="usuario_professor">Professor:</label>
-                    <select name="usuario_professor" id="usuario_professor" disabled required>
-                        <option value="">Selecione um professor</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="data">Data:</label>
-                    <input type="date" name="data" id="data" required>
-                </div>
-                <div class="form_text_area">
-                    <label for="registro_sessao">Registro da Sessão:</label>
-                    <textarea name="registro_sessao" id="registro_sessao" required></textarea>
-                </div>
-                <div class="form_text_area">
-                    <label for="anotacoes">Anotações:</label>
-                    <textarea name="anotacoes" id="anotacoes"></textarea>
-                </div>
-                <button class="botao_azul text_button" type="submit" name="botao" value="Cadastrar">Cadastrar</button>
-            </form>
+            <div class="content">
+                <?php if (!empty($erro_cadastro)): ?>
+                    <div class="error"><?php echo $erro_cadastro; ?></div>
+                <?php endif; ?>
+                <?php if (!empty($sucesso_cadastro)): ?>
+                    <div class="success"><?php echo $sucesso_cadastro; ?></div>
+                <?php endif; ?>
+                <form class="main_form" action="cadastrarSessoes.php" method="post" enctype="multipart/form-data">
+                    <div class="form_group">
+                        <div class="form_input">
+                            <label for="paciente">Paciente:</label>
+                            <select name="paciente" id="paciente" required>
+                                <option value="">Selecione um paciente</option>
+                                <?php
+                                while ($row = mysqli_fetch_assoc($resultPacientes)) {
+                                    echo '<option value="' . $row['id_paciente'] . '">' . $row['nome'] . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form_input">
+                            <label for="usuario_aluno">Aluno:</label>
+                            <input type="text" name="usuario_aluno_nome" id="usuario_aluno_nome" value="<?php echo $nomeAlunoLogado; ?>" disabled>
+                            <input type="hidden" name="usuario_aluno" id="usuario_aluno" value="<?php echo $idAlunoLogado; ?>">
+                        </div>
+                        <div class="form_input">
+                            <label for="usuario_professor">Professor:</label>
+                            <select name="usuario_professor" id="usuario_professor" required>
+                                <option value="">Selecione um professor</option>
+                                <?php
+                                while ($row = mysqli_fetch_assoc($resultProfessores)) {
+                                    echo '<option value="' . $row['id_usuario'] . '">' . $row['nome'] . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form_input">
+                            <label for="data">Data:</label>
+                            <input type="date" name="data" id="data" required>
+                            <span id="dataError" class="error"></span>
+                        </div>
+                    </div>
+                    <div class="form_group full_width">
+                        <div class="form_text_area">
+                            <label for="registro_sessao">Registro da Sessão:</label>
+                            <textarea name="registro_sessao" id="registro_sessao" required></textarea>
+                        </div>
+                        <div class="form_text_area">
+                            <label for="anotacoes">Anotações:</label>
+                            <textarea name="anotacoes" id="anotacoes"></textarea>
+                        </div>
+                        <div class="file_attachment">
+                            <input type="file" name="arquivo" id="arquivo" class="file_input">
+                            <label for="arquivo" class="file_label">
+                                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.625 20.125C9.39294 20.125 9.17038 20.2172 9.00628 20.3813C8.84219 20.5454 8.75 20.7679 8.75 21C8.75 21.2321 8.84219 21.4546 9.00628 21.6187C9.17038 21.7828 9.39294 21.875 9.625 21.875H18.375C18.6071 21.875 18.8296 21.7828 18.9937 21.6187C19.1578 21.4546 19.25 21.2321 19.25 21C19.25 20.7679 19.1578 20.5454 18.9937 20.3813C18.8296 20.2172 18.6071 20.125 18.375 20.125H9.625ZM8.75 17.5C8.75 17.2679 8.84219 17.0454 9.00628 16.8813C9.17038 16.7172 9.39294 16.625 9.625 16.625H18.375C18.6071 16.625 18.8296 16.7172 18.9937 16.8813C19.1578 17.0454 19.25 17.2679 19.25 17.5C19.25 17.7321 19.1578 17.9546 18.9937 18.1187C18.8296 18.2828 18.6071 18.375 18.375 18.375H9.625C9.39294 18.375 9.17038 18.2828 9.00628 18.1187C8.84219 17.9546 8.75 17.7321 8.75 17.5ZM9.625 13.125C9.39294 13.125 9.17038 13.2172 9.00628 13.3813C8.84219 13.5454 8.75 13.7679 8.75 14C8.75 14.2321 8.84219 14.4546 9.00628 14.6187C9.17038 14.7828 9.39294 14.875 9.625 14.875H18.375C18.6071 14.875 18.8296 14.7828 18.9937 14.6187C19.1578 14.4546 19.25 14.2321 19.25 14C19.25 13.7679 19.1578 13.5454 18.9937 13.3813C18.8296 13.2172 18.6071 13.125 18.375 13.125H9.625ZM4.375 4.375C4.375 3.67881 4.65156 3.01113 5.14384 2.51884C5.63613 2.02656 6.30381 1.75 7 1.75H15.9005C16.5963 1.75038 17.2635 2.02702 17.7555 2.51912L22.8568 7.61862C23.3487 8.11094 23.6251 8.77849 23.625 9.4745V23.625C23.625 24.3212 23.3484 24.9889 22.8562 25.4812C22.3639 25.9734 21.6962 26.25 21 26.25H7C6.30381 26.25 5.63613 25.9734 5.14384 25.4812C4.65156 24.9889 4.375 24.3212 4.375 23.625V4.375ZM7 3.5C6.76794 3.5 6.54538 3.59219 6.38128 3.75628C6.21719 3.92038 6.125 4.14294 6.125 4.375V23.625C6.125 23.8571 6.21719 24.0796 6.38128 24.2437C6.54538 24.4078 6.76794 24.5 7 24.5H21C21.2321 24.5 21.4546 24.4078 21.6187 24.2437C21.7828 24.0796 21.875 23.8571 21.875 23.625V10.5H17.5C16.8038 10.5 16.1361 10.2234 15.6438 9.73116C15.1516 9.23887 14.875 8.57119 14.875 7.875V3.5H7ZM17.5 8.75H21.5128L16.625 3.86225V7.875C16.625 8.10706 16.7172 8.32962 16.8813 8.49372C17.0454 8.65781 17.2679 8.75 17.5 8.75Z" fill="white"/>
+                                </svg>
+                                <span>Anexar Arquivo</span>
+                            </label>
+                        </div>
+                        <button class="botao_cadastro text_button" type="submit" name="botao" value="Cadastrar">Cadastrar</button>
+                    </div>
+                </form>
+            </div>
         </main>
     </div>
 </body>

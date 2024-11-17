@@ -147,7 +147,12 @@ $result = mysqli_query($conn, $query);
                                     echo "<tr>";
                                     foreach ($colunas as $coluna) {
                                         $campo = $mapeamento[$coluna];
-                                        echo "<td>" . (isset($row[$campo]) ? $row[$campo] : '') . "</td>";
+                                        if ($coluna == 'Data de Nascimento' && isset($row[$campo])) {
+                                            $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
+                                            echo "<td>$dataFormatada</td>";
+                                        } else {
+                                            echo "<td>" . (isset($row[$campo]) ? $row[$campo] : '') . "</td>";
+                                        }
                                     }
                                     echo "</tr>";
                                 }
@@ -158,10 +163,28 @@ $result = mysqli_query($conn, $query);
                         </tbody>
                     </table>
                 </div>
-                <!-- Botão para cadastrar novo registro, exceto para notificações -->
+                <!-- Botão para cadastrar novo registro -->
                 <?php if ($tipo != 'notificacoes'): ?>
                 <div class="button-container">
-                    <a href="<?php echo $tipo == 'sessoes' ? 'cadastrarSessoes.php' : 'cadastrar' . ucfirst($tipo) . '.php'; ?>" class="botao_azul text_button">Cadastrar <?php echo ucfirst($tipo); ?></a>
+                    <?php
+                    switch ($tipo) {
+                        case 'pacientes':
+                            echo '<a href="cadastrarPacientes.php" class="botao_azul text_button">Cadastrar Paciente</a>';
+                            break;
+                        case 'alunos':
+                            echo '<a href="cadastrarAlunos.php" class="botao_azul text_button">Cadastrar Aluno</a>';
+                            break;
+                        case 'professores':
+                            echo '<a href="cadastrarProfessores.php" class="botao_azul text_button">Cadastrar Professor</a>';
+                            break;
+                        case 'documentos':
+                            echo '<a href="cadastrarDocumentos.php" class="botao_azul text_button">Cadastrar Documento</a>';
+                            break;
+                        case 'sessoes':
+                            echo '<a href="cadastrarSessoes.php" class="botao_azul text_button">Cadastrar Sessão</a>';
+                            break;
+                    }
+                    ?>
                 </div>
                 <?php endif; ?>
             </div>
