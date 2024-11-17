@@ -203,7 +203,14 @@ textarea {
     border: none;
 }
 
-.botao_azul:hover {
+.botao_azul:disabled {
+    background-color: var(--light-gray);
+    color: var(--black);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.botao_azul:hover:not(:disabled) {
     background-color: var(--darker-primary-color);
 }
 
@@ -220,7 +227,7 @@ textarea {
     margin-top: 16px;
 }
 
-.botao_cadastro:hover {
+.botao_cadastro:hover:not(:disabled) {
     background-color: var(--darker-primary-color);
 }
 

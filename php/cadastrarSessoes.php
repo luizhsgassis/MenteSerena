@@ -25,44 +25,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $registroSessao = $_POST["registro_sessao"];
     $anotacoes = $_POST["anotacoes"];
     $idUsuario = $_SESSION['id_usuario'];
+    $rascunho = ($_POST['botao'] == 'Rascunho') ? 1 : 0;
 
-    // Validações
-    if (empty($idPaciente) || empty($idAluno) || empty($idProfessor) || empty($data) || empty($registroSessao)) {
-        $erro_cadastro = "Por favor, preencha todos os campos obrigatórios.";
-    } elseif (!validateDate($data)) {
-        $erro_cadastro = "Por favor, preencha uma data válida.";
-    } else {
-        // Inserir dados na tabela Sessoes
-        $querySessao = "INSERT INTO Sessoes (id_prontuario, id_paciente, id_usuario, data, registro_sessao, anotacoes) VALUES (NULL, ?, ?, ?, ?, ?)";
-        $stmtSessao = mysqli_prepare($conn, $querySessao);
-        mysqli_stmt_bind_param($stmtSessao, "iiiss", $idPaciente, $idUsuario, $data, $registroSessao, $anotacoes);
+    // Consulta para obter o ID do prontuário do paciente
+    $queryProntuario = "SELECT id_prontuario FROM Prontuarios WHERE id_paciente = ?";
+    $stmtProntuario = mysqli_prepare($conn, $queryProntuario);
+    mysqli_stmt_bind_param($stmtProntuario, "i", $idPaciente);
+    mysqli_stmt_execute($stmtProntuario);
+    mysqli_stmt_bind_result($stmtProntuario, $idProntuario);
+    mysqli_stmt_fetch($stmtProntuario);
+    mysqli_stmt_close($stmtProntuario);
 
-        if (mysqli_stmt_execute($stmtSessao)) {
-            $idSessao = mysqli_insert_id($conn);
-            $sucesso_cadastro = "Sessão cadastrada com sucesso!";
+    // Inserir dados na tabela Sessoes
+    $querySessao = "INSERT INTO Sessoes (id_prontuario, id_paciente, id_usuario, data, registro_sessao, anotacoes, rascunho) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $stmtSessao = mysqli_prepare($conn, $querySessao);
+    mysqli_stmt_bind_param($stmtSessao, "iiisssi", $idProntuario, $idPaciente, $idUsuario, $data, $registroSessao, $anotacoes, $rascunho);
 
-            // Lidar com o upload do arquivo
-            if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] == UPLOAD_ERR_OK) {
-                $arquivoTmp = $_FILES['arquivo']['tmp_name'];
-                $arquivoNome = $_FILES['arquivo']['name'];
-                $arquivoTipo = $_FILES['arquivo']['type'];
-                $arquivoData = date('Y-m-d');
-                $arquivoConteudo = file_get_contents($arquivoTmp);
+    if (mysqli_stmt_execute($stmtSessao)) {
+        $idSessao = mysqli_insert_id($conn);
+        $sucesso_cadastro = "Sessão cadastrada com sucesso!";
 
-                // Inserir dados na tabela ArquivosDigitalizados
-                $queryArquivo = "INSERT INTO ArquivosDigitalizados (id_paciente, id_usuario, id_sessao, tipo_documento, data_upload, arquivo) VALUES (?, ?, ?, ?, ?, ?)";
-                $stmtArquivo = mysqli_prepare($conn, $queryArquivo);
-                mysqli_stmt_bind_param($stmtArquivo, "iiisss", $idPaciente, $idUsuario, $idSessao, $arquivoTipo, $arquivoData, $arquivoConteudo);
+        // Lidar com o upload do arquivo
+        if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] == UPLOAD_ERR_OK) {
+            $arquivoTmp = $_FILES['arquivo']['tmp_name'];
+            $arquivoNome = $_FILES['arquivo']['name'];
+            $arquivoTipo = $_FILES['arquivo']['type'];
+            $arquivoData = date('Y-m-d');
+            $arquivoConteudo = file_get_contents($arquivoTmp);
 
-                if (mysqli_stmt_execute($stmtArquivo)) {
-                    $sucesso_cadastro .= " Arquivo anexado com sucesso!";
-                } else {
-                    $erro_cadastro = "Erro ao anexar o arquivo: " . mysqli_error($conn);
-                }
+            // Inserir dados na tabela ArquivosDigitalizados
+            $queryArquivo = "INSERT INTO ArquivosDigitalizados (id_paciente, id_usuario, id_sessao, tipo_documento, data_upload, arquivo) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmtArquivo = mysqli_prepare($conn, $queryArquivo);
+            mysqli_stmt_bind_param($stmtArquivo, "iiisss", $idPaciente, $idUsuario, $idSessao, $arquivoTipo, $arquivoData, $arquivoConteudo);
+
+            if (mysqli_stmt_execute($stmtArquivo)) {
+                $sucesso_cadastro .= " Arquivo anexado com sucesso!";
+            } else {
+                $erro_cadastro = "Erro ao anexar o arquivo: " . mysqli_error($conn);
             }
-        } else {
-            $erro_cadastro = "Erro ao cadastrar sessão: " . mysqli_error($conn);
         }
+
+        // Verificar se a sessão é um rascunho e criar notificação se necessário
+        if ($rascunho) {
+            $queryNotificacao = "INSERT INTO Avisos (id_sessao, id_usuario, mensagem, data, status) VALUES (?, ?, ?, ?, 'pendente')";
+            $stmtNotificacao = mysqli_prepare($conn, $queryNotificacao);
+            $mensagem = "A sessão de ID $idSessao está em rascunho há mais de 24 horas.";
+            $dataNotificacao = date('Y-m-d H:i:s');
+            mysqli_stmt_bind_param($stmtNotificacao, "iiss", $idSessao, $idUsuario, $mensagem, $dataNotificacao);
+            mysqli_stmt_execute($stmtNotificacao);
+            mysqli_stmt_close($stmtNotificacao);
+        }
+    } else {
+        $erro_cadastro = "Erro ao cadastrar sessão: " . mysqli_error($conn);
     }
 }
 
@@ -86,6 +100,21 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const finalizarBtn = document.getElementById('finalizarBtn');
+            const formInputs = document.querySelectorAll('.main_form input[required], .main_form select[required], .main_form textarea[required]');
+
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    let allFilled = true;
+                    formInputs.forEach(input => {
+                        if (input.value === '') {
+                            allFilled = false;
+                        }
+                    });
+                    finalizarBtn.disabled = !allFilled;
+                });
+            });
+
             // Validação da data
             document.getElementById('data').addEventListener('blur', function() {
                 var data = this.value;
@@ -196,7 +225,7 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                     <div class="form_group full_width">
                         <div class="form_text_area">
                             <label for="registro_sessao">Registro da Sessão:</label>
-                            <textarea name="registro_sessao" id="registro_sessao" required></textarea>
+                            <textarea name="registro_sessao" id="registro_sessao"></textarea>
                         </div>
                         <div class="form_text_area">
                             <label for="anotacoes">Anotações:</label>
@@ -211,7 +240,8 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                                 <span>Anexar Arquivo</span>
                             </label>
                         </div>
-                        <button class="botao_cadastro text_button" type="submit" name="botao" value="Cadastrar">Cadastrar</button>
+                        <button class="botao_cadastro text_button" type="submit" name="botao" value="Rascunho">Rascunho</button>
+                        <button class="botao_cadastro text_button" type="submit" id="finalizarBtn" name="botao" value="Finalizar" disabled>Finalizar</button>
                     </div>
                 </form>
             </div>

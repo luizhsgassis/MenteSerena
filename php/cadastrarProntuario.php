@@ -36,7 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         mysqli_stmt_bind_param($stmtProntuario, "iissss", $idPaciente, $idUsuario, $dataAbertura, $historicoFamiliar, $historicoSocial, $consideracoesFinais);
 
         if (mysqli_stmt_execute($stmtProntuario)) {
-            $sucesso_cadastro = "Prontuário cadastrado com sucesso!";
+            header("Location: mainContent.php?tipo=pacientes");
+            exit;
         } else {
             $erro_cadastro = "Erro ao cadastrar prontuário: " . mysqli_error($conn);
         }
@@ -96,9 +97,6 @@ mysqli_stmt_close($stmtPaciente);
             <div class="content">
                 <?php if (!empty($erro_cadastro)): ?>
                     <div class="error"><?php echo $erro_cadastro; ?></div>
-                <?php endif; ?>
-                <?php if (!empty($sucesso_cadastro)): ?>
-                    <div class="success"><?php echo $sucesso_cadastro; ?></div>
                 <?php endif; ?>
                 <form class="main_form" action="cadastrarProntuario.php" method="post">
                     <div class="form_group">

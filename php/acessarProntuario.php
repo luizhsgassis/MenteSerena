@@ -1,0 +1,219 @@
+<?php
+session_start();
+
+include('../config.php');
+include('functions.php');
+
+// Verifica se o usuário está logado
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: /MenteSerena-master/index.php");
+    exit;
+}
+
+// Obtém o ID do paciente da URL
+$idPaciente = isset($_GET['paciente_id']) ? $_GET['paciente_id'] : '';
+$idUsuarioLogado = $_SESSION['id_usuario'];
+$nivelAcesso = $_SESSION['UsuarioNivel'];
+
+$erro_acesso = '';
+$sucesso_acesso = '';
+
+// Consulta para obter as informações do prontuário
+$queryProntuario = "SELECT * FROM Prontuarios WHERE id_paciente = ?";
+$stmtProntuario = mysqli_prepare($conn, $queryProntuario);
+mysqli_stmt_bind_param($stmtProntuario, "i", $idPaciente);
+mysqli_stmt_execute($stmtProntuario);
+$resultProntuario = mysqli_stmt_get_result($stmtProntuario);
+$prontuario = mysqli_fetch_assoc($resultProntuario);
+mysqli_stmt_close($stmtProntuario);
+
+if (!$prontuario) {
+    $erro_acesso = "Prontuário não encontrado.";
+}
+
+// Consulta para obter a lista de professores
+$queryProfessores = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'professor'";
+$resultProfessores = mysqli_query($conn, $queryProfessores);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Concluído') {
+    $idProfessor = trim($_POST["professor"]);
+    $dataAbertura = trim($_POST["data_abertura"]);
+    $historicoFamiliar = trim($_POST["historico_familiar"]);
+    $historicoSocial = trim($_POST["historico_social"]);
+    $consideracoesFinais = trim($_POST["consideracoes_finais"]);
+
+    // Validações
+    if (empty($dataAbertura) || !validateDate($dataAbertura)) {
+        $erro_acesso = "Por favor, preencha uma data de abertura válida.";
+    } else {
+        $queryUpdate = "UPDATE Prontuarios SET id_professor = ?, data_abertura = ?, historico_familiar = ?, historico_social = ?, consideracoes_finais = ? WHERE id_prontuario = ?";
+        $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+        mysqli_stmt_bind_param($stmtUpdate, "issssi", $idProfessor, $dataAbertura, $historicoFamiliar, $historicoSocial, $consideracoesFinais, $prontuario['id_prontuario']);
+
+        if (mysqli_stmt_execute($stmtUpdate)) {
+            $sucesso_acesso = "Dados do prontuário atualizados com sucesso!";
+            // Recarrega a página para mostrar os dados atualizados
+            header("Location: acessarProntuario.php?paciente_id=" . $idPaciente);
+            exit;
+        } else {
+            $erro_acesso = "Erro ao atualizar os dados do prontuário: " . mysqli_error($conn);
+        }
+        mysqli_stmt_close($stmtUpdate);
+    }
+}
+
+// Consulta para obter as sessões do prontuário
+if ($nivelAcesso == 'aluno') {
+    $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
+                     FROM Sessoes s 
+                     LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
+                     WHERE s.id_prontuario = ? AND s.id_usuario = ?";
+    $stmtSessoes = mysqli_prepare($conn, $querySessoes);
+    mysqli_stmt_bind_param($stmtSessoes, "ii", $prontuario['id_prontuario'], $idUsuarioLogado);
+} else {
+    $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
+                     FROM Sessoes s 
+                     LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
+                     WHERE s.id_prontuario = ?";
+    $stmtSessoes = mysqli_prepare($conn, $querySessoes);
+    mysqli_stmt_bind_param($stmtSessoes, "i", $prontuario['id_prontuario']);
+}
+mysqli_stmt_execute($stmtSessoes);
+$resultSessoes = mysqli_stmt_get_result($stmtSessoes);
+?>
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Acessar Prontuário</title>
+  <link rel="stylesheet" href="../estilo.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/mainContent.css">
+  <style>
+    .content {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const alterarBtn = document.getElementById('alterarBtn');
+        const concluidoBtn = document.getElementById('concluidoBtn');
+        const formInputs = document.querySelectorAll('.main_form input, .main_form textarea, .main_form select');
+
+        alterarBtn.addEventListener('click', function() {
+            formInputs.forEach(input => input.disabled = false);
+            alterarBtn.disabled = true;
+            concluidoBtn.disabled = false;
+        });
+
+        // Validação da data de abertura
+        document.getElementById('data_abertura').addEventListener('blur', function() {
+            var dataAbertura = this.value;
+            var dataAberturaError = document.getElementById('dataAberturaError');
+            if (!isValidDate(dataAbertura)) {
+                dataAberturaError.textContent = 'Por favor, preencha uma data de abertura válida.';
+            } else {
+                dataAberturaError.textContent = '';
+            }
+        });
+
+        // Função para validar a data
+        function isValidDate(dateString) {
+            var regEx = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateString.match(regEx)) return false;  // Formato inválido
+            var d = new Date(dateString);
+            var dNum = d.getTime();
+            if (!dNum && dNum !== 0) return false; // Data inválida
+            return d.toISOString().slice(0, 10) === dateString;
+        }
+    });
+  </script>
+</head>
+<body>
+  <div class="body_section">
+    <!-- Inclui o conteúdo de sidebar.php -->
+    <?php include('sidebar.php'); ?>
+    <main>
+      <div class="main_title"><h2>Informações do Prontuário</h2></div>
+      <div class="content">
+        <?php if (!empty($erro_acesso)): ?>
+          <div class="error"><?php echo $erro_acesso; ?></div>
+        <?php elseif (!empty($sucesso_acesso)): ?>
+          <div class="success"><?php echo $sucesso_acesso; ?></div>
+        <?php endif; ?>
+        <form class="main_form" action="acessarProntuario.php?paciente_id=<?php echo $idPaciente; ?>" method="post">
+          <div class="form_group full_width">
+            <div class="form_input">
+              <label for="professor">Professor:</label>
+              <select name="professor" id="professor" disabled>
+                <option value="">Selecione um professor</option>
+                <?php while ($professor = mysqli_fetch_assoc($resultProfessores)): ?>
+                  <option value="<?php echo $professor['id_usuario']; ?>" <?php echo ($prontuario['id_professor'] == $professor['id_usuario']) ? 'selected' : ''; ?>>
+                    <?php echo $professor['nome']; ?>
+                  </option>
+                <?php endwhile; ?>
+              </select>
+            </div>
+            <div class="form_input">
+              <label for="data_abertura">Data de Abertura:</label>
+              <input type="date" name="data_abertura" id="data_abertura" value="<?php echo $prontuario['data_abertura']; ?>" disabled>
+              <span id="dataAberturaError" class="error"></span>
+            </div>
+            <div class="form_text_area">
+              <label for="historico_familiar">Histórico Familiar:</label>
+              <textarea name="historico_familiar" id="historico_familiar" disabled><?php echo $prontuario['historico_familiar']; ?></textarea>
+            </div>
+            <div class="form_text_area">
+              <label for="historico_social">Histórico Social:</label>
+              <textarea name="historico_social" id="historico_social" disabled><?php echo $prontuario['historico_social']; ?></textarea>
+            </div>
+            <div class="form_text_area">
+              <label for="consideracoes_finais">Considerações Finais:</label>
+              <textarea name="consideracoes_finais" id="consideracoes_finais" disabled><?php echo $prontuario['consideracoes_finais']; ?></textarea>
+            </div>
+          </div>
+          <div class="form_group full_width">
+            <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
+            <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
+            <a href="acessarPacientes.php?id=<?php echo $idPaciente; ?>" class="botao_azul text_button">Voltar</a>
+          </div>
+        </form>
+        <h3>Sessões</h3>
+        <div class="table-container">
+          
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Registro da Sessão</th>
+                <th>Anotações</th>
+                <th>Usuário</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php if (mysqli_num_rows($resultSessoes) > 0): ?>
+                <?php while ($sessao = mysqli_fetch_assoc($resultSessoes)): ?>
+                  <tr>
+                    <td><?php echo $sessao['id_sessao']; ?></td>
+                    <td><?php echo date('d/m/Y', strtotime($sessao['data'])); ?></td>
+                    <td><?php echo $sessao['registro_sessao']; ?></td>
+                    <td><?php echo $sessao['anotacoes']; ?></td>
+                    <td><?php echo $sessao['nome_usuario']; ?></td>
+                  </tr>
+                <?php endwhile; ?>
+              <?php else: ?>
+                <tr>
+                  <td colspan="5">Nenhuma sessão encontrada</td>
+                </tr>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

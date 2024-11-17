@@ -14,6 +14,7 @@ $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'pacientes';
 
 // Verifica o nível de acesso do usuário
 $nivelAcesso = $_SESSION['UsuarioNivel'];
+$idUsuarioLogado = $_SESSION['id_usuario'];
 
 switch ($tipo) {
     case 'professores':
@@ -34,6 +35,7 @@ switch ($tipo) {
             'Email' => 'email',
             'Telefone' => 'telefone'
         ];
+        $detalheUrl = 'acessarProfessores.php';
         break;
     case 'alunos':
         // Verifica se o usuário é administrador ou professor
@@ -53,46 +55,77 @@ switch ($tipo) {
             'Email' => 'email',
             'Telefone' => 'telefone'
         ];
+        $detalheUrl = 'acessarAlunos.php';
         break;
     case 'documentos':
-        $query = "SELECT * FROM ArquivosDigitalizados";
+        $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario 
+                  FROM ArquivosDigitalizados ad
+                  LEFT JOIN Pacientes p ON ad.id_paciente = p.id_paciente
+                  LEFT JOIN Usuarios u ON ad.id_usuario = u.id_usuario
+                  WHERE ad.id_usuario = $idUsuarioLogado";
         $titulo = "Documentos";
         $colunas = ['ID', 'Paciente', 'Usuário', 'Sessão', 'Tipo de Documento', 'Data de Upload'];
         $mapeamento = [
             'ID' => 'id_arquivo',
-            'Paciente' => 'id_paciente',
-            'Usuário' => 'id_usuario',
+            'Paciente' => 'nome_paciente',
+            'Usuário' => 'nome_usuario',
             'Sessão' => 'id_sessao',
             'Tipo de Documento' => 'tipo_documento',
             'Data de Upload' => 'data_upload'
         ];
+        $detalheUrl = 'acessarDocumentos.php';
         break;
     case 'sessoes':
-        $query = "SELECT * FROM Sessoes";
+        if ($nivelAcesso == 'aluno') {
+            $query = "SELECT s.id_sessao, s.id_prontuario, s.id_paciente, s.id_usuario, s.data, s.registro_sessao, s.anotacoes, p.consideracoes_finais, pa.nome AS nome_paciente, u.nome AS nome_usuario 
+                      FROM Sessoes s 
+                      LEFT JOIN Prontuarios p ON s.id_prontuario = p.id_prontuario
+                      LEFT JOIN Pacientes pa ON s.id_paciente = pa.id_paciente
+                      LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
+                      WHERE s.id_usuario = $idUsuarioLogado";
+        } else {
+            $query = "SELECT s.id_sessao, s.id_prontuario, s.id_paciente, s.id_usuario, s.data, s.registro_sessao, s.anotacoes, p.consideracoes_finais, pa.nome AS nome_paciente, u.nome AS nome_usuario 
+                      FROM Sessoes s 
+                      LEFT JOIN Prontuarios p ON s.id_prontuario = p.id_prontuario
+                      LEFT JOIN Pacientes pa ON s.id_paciente = pa.id_paciente
+                      LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario";
+        }
         $titulo = "Sessões";
         $colunas = ['ID', 'Prontuário', 'Paciente', 'Usuário', 'Data', 'Registro da Sessão', 'Anotações'];
         $mapeamento = [
             'ID' => 'id_sessao',
-            'Prontuário' => 'id_prontuario',
-            'Paciente' => 'id_paciente',
-            'Usuário' => 'id_usuario',
+            'Prontuário' => 'consideracoes_finais',
+            'Paciente' => 'nome_paciente',
+            'Usuário' => 'nome_usuario',
             'Data' => 'data',
             'Registro da Sessão' => 'registro_sessao',
             'Anotações' => 'anotacoes'
         ];
+        $detalheUrl = 'acessarSessoes.php';
         break;
     case 'notificacoes':
-        $query = "SELECT * FROM Avisos";
+        if ($nivelAcesso == 'aluno') {
+            $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, a.data, a.status, u.nome AS nome_usuario
+                      FROM Avisos a
+                      LEFT JOIN Usuarios u ON a.id_usuario = u.id_usuario
+                      WHERE a.id_usuario = $idUsuarioLogado AND a.status = 'pendente'";
+        } else {
+            $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, a.data, a.status, u.nome AS nome_usuario
+                      FROM Avisos a
+                      LEFT JOIN Usuarios u ON a.id_usuario = u.id_usuario
+                      WHERE a.status = 'pendente'";
+        }
         $titulo = "Notificações";
         $colunas = ['ID', 'Sessão', 'Usuário', 'Mensagem', 'Data', 'Status'];
         $mapeamento = [
             'ID' => 'id_aviso',
             'Sessão' => 'id_sessao',
-            'Usuário' => 'id_usuario',
+            'Usuário' => 'nome_usuario',
             'Mensagem' => 'mensagem',
             'Data' => 'data',
             'Status' => 'status'
         ];
+        $detalheUrl = 'acessarSessoes.php'; // Redireciona para a sessão específica
         break;
     case 'pacientes':
     default:
@@ -108,6 +141,7 @@ switch ($tipo) {
             'Email' => 'email',
             'Telefone' => 'telefone'
         ];
+        $detalheUrl = 'acessarPacientes.php';
         break;
 }
 
@@ -144,7 +178,8 @@ $result = mysqli_query($conn, $query);
                             <?php
                             if (mysqli_num_rows($result) > 0) {
                                 while ($row = mysqli_fetch_assoc($result)) {
-                                    echo "<tr>";
+                                    $rowUrl = ($tipo == 'notificacoes') ? "acessarSessoes.php?id=" . $row['id_sessao'] : "$detalheUrl?id=" . $row[$mapeamento['ID']];
+                                    echo "<tr onclick=\"window.location.href='$rowUrl'\">";
                                     foreach ($colunas as $coluna) {
                                         $campo = $mapeamento[$coluna];
                                         if ($coluna == 'Data de Nascimento' && isset($row[$campo])) {

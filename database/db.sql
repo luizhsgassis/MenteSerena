@@ -54,6 +54,7 @@ CREATE TABLE Sessoes (
     data DATE NOT NULL,
     registro_sessao TEXT,
     anotacoes TEXT,
+    rascunho BOOLEAN NOT NULL DEFAULT 1,
     FOREIGN KEY (id_prontuario) REFERENCES Prontuarios(id_prontuario),
     FOREIGN KEY (id_paciente) REFERENCES Pacientes(id_paciente),
     FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario)

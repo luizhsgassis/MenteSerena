@@ -65,7 +65,7 @@ if (isset($_SESSION['id_usuario'])) {
           </div>
         </div>
         <div class="configuracoes">
-          <a href="#">
+          <a href="acessarUsuario.php?id=' . $_SESSION['id_usuario'] . '">
             <img src="../images/setting.svg" alt="Configurações">
             <span>Configurações</span>
           </a>

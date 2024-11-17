@@ -46,6 +46,10 @@ table {
     border-radius: 36px;
 }
 
+.table-container table tbody tr {
+    cursor: pointer; /* Adiciona o cursor pointer */
+}
+
 table th, table td {
     padding: 12px 15px;
     border: 1px solid #ddd;
