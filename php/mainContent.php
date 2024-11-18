@@ -58,11 +58,18 @@ switch ($tipo) {
         $detalheUrl = 'acessarAlunos.php';
         break;
     case 'documentos':
-        $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario 
-                  FROM ArquivosDigitalizados ad
-                  LEFT JOIN Pacientes p ON ad.id_paciente = p.id_paciente
-                  LEFT JOIN Usuarios u ON ad.id_usuario = u.id_usuario
-                  WHERE ad.id_usuario = $idUsuarioLogado";
+        if ($nivelAcesso == 'aluno') {
+            $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario 
+                        FROM ArquivosDigitalizados ad
+                        LEFT JOIN Pacientes p ON ad.id_paciente = p.id_paciente
+                        LEFT JOIN Usuarios u ON ad.id_usuario = u.id_usuario
+                        WHERE ad.id_usuario = $idUsuarioLogado";
+        } else {
+            $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario 
+                        FROM ArquivosDigitalizados ad
+                        LEFT JOIN Pacientes p ON ad.id_paciente = p.id_paciente
+                        LEFT JOIN Usuarios u ON ad.id_usuario = u.id_usuario";
+        }
         $titulo = "Documentos";
         $colunas = ['ID', 'Paciente', 'Usuário', 'Sessão', 'Tipo de Documento', 'Data de Upload'];
         $mapeamento = [
@@ -105,24 +112,26 @@ switch ($tipo) {
         break;
     case 'notificacoes':
         if ($nivelAcesso == 'aluno') {
-            $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, a.data, a.status, u.nome AS nome_usuario
+            $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, s.data AS data_sessao, a.status, u.nome AS nome_usuario
                       FROM Avisos a
                       LEFT JOIN Usuarios u ON a.id_usuario = u.id_usuario
-                      WHERE a.id_usuario = $idUsuarioLogado AND a.status = 'pendente'";
+                      LEFT JOIN Sessoes s ON a.id_sessao = s.id_sessao
+                      WHERE a.id_usuario = $idUsuarioLogado AND a.status = 'pendente' AND s.data <= DATE_SUB(NOW(), INTERVAL 48 HOUR)";
         } else {
-            $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, a.data, a.status, u.nome AS nome_usuario
+            $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, s.data AS data_sessao, a.status, u.nome AS nome_usuario
                       FROM Avisos a
                       LEFT JOIN Usuarios u ON a.id_usuario = u.id_usuario
-                      WHERE a.status = 'pendente'";
+                      LEFT JOIN Sessoes s ON a.id_sessao = s.id_sessao
+                      WHERE a.status = 'pendente' AND s.data <= DATE_SUB(NOW(), INTERVAL 48 HOUR)";
         }
         $titulo = "Notificações";
-        $colunas = ['ID', 'Sessão', 'Usuário', 'Mensagem', 'Data', 'Status'];
+        $colunas = ['ID', 'Sessão', 'Usuário', 'Mensagem', 'Data da Sessão', 'Status'];
         $mapeamento = [
             'ID' => 'id_aviso',
             'Sessão' => 'id_sessao',
             'Usuário' => 'nome_usuario',
             'Mensagem' => 'mensagem',
-            'Data' => 'data',
+            'Data da Sessão' => 'data_sessao',
             'Status' => 'status'
         ];
         $detalheUrl = 'acessarSessoes.php'; // Redireciona para a sessão específica
@@ -183,6 +192,12 @@ $result = mysqli_query($conn, $query);
                                     foreach ($colunas as $coluna) {
                                         $campo = $mapeamento[$coluna];
                                         if ($coluna == 'Data de Nascimento' && isset($row[$campo])) {
+                                            $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
+                                            echo "<td>$dataFormatada</td>";
+                                        } elseif ($coluna == 'Data da Sessão' && isset($row[$campo])) {
+                                            $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
+                                            echo "<td>$dataFormatada</td>";
+                                        } elseif ($coluna == 'Data' && isset($row[$campo])) {
                                             $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
                                             echo "<td>$dataFormatada</td>";
                                         } else {

@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($rascunho) {
             $queryNotificacao = "INSERT INTO Avisos (id_sessao, id_usuario, mensagem, data, status) VALUES (?, ?, ?, ?, 'pendente')";
             $stmtNotificacao = mysqli_prepare($conn, $queryNotificacao);
-            $mensagem = "A sessão de ID $idSessao está em rascunho há mais de 24 horas.";
+            $mensagem = "A sessão de ID $idSessao está em rascunho há mais de 48 horas.";
             $dataNotificacao = date('Y-m-d H:i:s');
             mysqli_stmt_bind_param($stmtNotificacao, "iiss", $idSessao, $idUsuario, $mensagem, $dataNotificacao);
             mysqli_stmt_execute($stmtNotificacao);
@@ -101,19 +101,29 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const finalizarBtn = document.getElementById('finalizarBtn');
-            const formInputs = document.querySelectorAll('.main_form input[required], .main_form select[required], .main_form textarea[required]');
+            const formInputs = document.querySelectorAll('.main_form input[required], .main_form select[required], .main_form textarea');
+            const registroSessao = document.getElementById('registro_sessao');
+            const anotacoes = document.getElementById('anotacoes');
 
             formInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    let allFilled = true;
-                    formInputs.forEach(input => {
-                        if (input.value === '') {
-                            allFilled = false;
-                        }
-                    });
-                    finalizarBtn.disabled = !allFilled;
-                });
+                input.addEventListener('input', checkFormInputs);
             });
+
+            function checkFormInputs() {
+                let allFilled = true;
+                formInputs.forEach(input => {
+                    if (input.value === '') {
+                        allFilled = false;
+                    }
+                });
+
+                if (registroSessao.value === '' || anotacoes.value === '') {
+                    allFilled = false;
+                }
+
+                finalizarBtn.disabled = !allFilled;
+                finalizarBtn.classList.toggle('disabled', !allFilled);
+            }
 
             // Validação da data
             document.getElementById('data').addEventListener('blur', function() {
@@ -203,7 +213,7 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                         <div class="form_input">
                             <label for="usuario_aluno">Aluno:</label>
                             <input type="text" name="usuario_aluno_nome" id="usuario_aluno_nome" value="<?php echo $nomeAlunoLogado; ?>" disabled>
-                            <input type="hidden" name="usuario_aluno" id="usuario_aluno" value="<?php echo $idAlunoLogado; ?>">
+                            <input type="hidden" name="usuario_aluno" id="usuario_aluno" value="<?php echo $idAlunoLogado; ?>" required>
                         </div>
                         <div class="form_input">
                             <label for="usuario_professor">Professor:</label>
@@ -241,7 +251,7 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                             </label>
                         </div>
                         <button class="botao_cadastro text_button" type="submit" name="botao" value="Rascunho">Rascunho</button>
-                        <button class="botao_cadastro text_button" type="submit" id="finalizarBtn" name="botao" value="Finalizar" disabled>Finalizar</button>
+                        <button type="submit" id="finalizarBtn" class="botao_cadastro text_button" name="botao" value="Finalizar" disabled>Finalizar</button>
                     </div>
                 </form>
             </div>

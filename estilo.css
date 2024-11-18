@@ -140,7 +140,7 @@ textarea {
 .login_container {
     max-width: 892px;
     height: auto;
-    margin: 0 auto;
+    margin: 50px auto;
     background-color: var(--primary-color);
     color: var(--white);
     border-radius: 36px;
@@ -225,6 +225,13 @@ textarea {
     cursor: pointer;
     border: none;
     margin-top: 16px;
+}
+
+.botao_cadastro:disabled {
+    background-color: var(--light-gray);
+    color: var(--black);
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .botao_cadastro:hover:not(:disabled) {

@@ -16,8 +16,13 @@ $idSessao = isset($_GET['id']) ? $_GET['id'] : '';
 $erro_acesso = '';
 $sucesso_acesso = '';
 
-// Consulta para obter as informações da sessão
-$querySessao = "SELECT * FROM Sessoes WHERE id_sessao = ?";
+// Consulta para obter as informações adicionais da sessão
+$querySessao = "SELECT s.*, p.nome AS nome_paciente, u.nome AS nome_aluno, pr.nome AS nome_professor
+                FROM Sessoes s
+                LEFT JOIN Pacientes p ON s.id_paciente = p.id_paciente
+                LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
+                LEFT JOIN Usuarios pr ON s.id_usuario = pr.id_usuario
+                WHERE s.id_sessao = ?";
 $stmtSessao = mysqli_prepare($conn, $querySessao);
 mysqli_stmt_bind_param($stmtSessao, "i", $idSessao);
 mysqli_stmt_execute($stmtSessao);
@@ -25,10 +30,21 @@ $resultSessao = mysqli_stmt_get_result($stmtSessao);
 $sessao = mysqli_fetch_assoc($resultSessao);
 mysqli_stmt_close($stmtSessao);
 
+// Consulta para obter a lista de pacientes
+$queryPacientes = "SELECT id_paciente, nome FROM Pacientes";
+$resultPacientes = mysqli_query($conn, $queryPacientes);
+
+// Consulta para obter a lista de alunos
+$queryAlunos = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'aluno'";
+$resultAlunos = mysqli_query($conn, $queryAlunos);
+
+// Consulta para obter a lista de professores
+$queryProfessores = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'professor'";
+$resultProfessores = mysqli_query($conn, $queryProfessores);
+
 if (!$sessao) {
     $erro_acesso = "Sessão não encontrada.";
 }
-
 // Consulta para obter os arquivos anexados à sessão
 $queryArquivos = "SELECT id_arquivo, tipo_documento, data_upload FROM ArquivosDigitalizados WHERE id_sessao = ?";
 $stmtArquivos = mysqli_prepare($conn, $queryArquivos);
@@ -81,50 +97,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
   <link rel="stylesheet" href="../css/mainContent.css">
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const alterarBtn = document.getElementById('alterarBtn');
-        const concluidoBtn = document.getElementById('concluidoBtn');
-        const formInputs = document.querySelectorAll('.main_form input, .main_form textarea');
+      const alterarBtn = document.getElementById('alterarBtn');
+      const concluidoBtn = document.getElementById('concluidoBtn');
+      const formInputs = document.querySelectorAll('.main_form input, .main_form textarea');
+      const alunoInput = document.getElementById('aluno');
+      const pacienteInput = document.getElementById('paciente');
+      const professorInput = document.getElementById('professor');
 
-        alterarBtn.addEventListener('click', function() {
-            formInputs.forEach(input => input.disabled = false);
-            alterarBtn.disabled = true;
-            checkFormInputs();
-        });
+      alterarBtn.addEventListener('click', function() {
+          formInputs.forEach(input => {
+              if (input !== alunoInput && input !== pacienteInput && input !== professorInput) {
+                  input.disabled = false;
+              }
+          });
+          alterarBtn.disabled = true;
+          checkFormInputs();
+      });
 
-        formInputs.forEach(input => {
-            input.addEventListener('input', checkFormInputs);
-        });
+      formInputs.forEach(input => {
+          input.addEventListener('input', checkFormInputs);
+      });
 
-        function checkFormInputs() {
-            let allFilled = true;
-            formInputs.forEach(input => {
-                if (input.value === '') {
-                    allFilled = false;
-                }
-            });
-            concluidoBtn.disabled = !allFilled;
-        }
+      function checkFormInputs() {
+          let allFilled = true;
+          formInputs.forEach(input => {
+              if (input !== alunoInput && input !== pacienteInput && input !== professorInput && input.value === '') {
+                  allFilled = false;
+              }
+          });
+          concluidoBtn.disabled = !allFilled;
+      }
 
-        // Validação da data
-        document.getElementById('data').addEventListener('blur', function() {
-            var data = this.value;
-            var dataError = document.getElementById('dataError');
-            if (!isValidDate(data)) {
-                dataError.textContent = 'Por favor, preencha uma data válida.';
-            } else {
-                dataError.textContent = '';
-            }
-        });
+      // Validação da data
+      document.getElementById('data').addEventListener('blur', function() {
+          var data = this.value;
+          var dataError = document.getElementById('dataError');
+          if (!isValidDate(data)) {
+              dataError.textContent = 'Por favor, preencha uma data válida.';
+          } else {
+              dataError.textContent = '';
+          }
+      });
 
-        // Função para validar a data
-        function isValidDate(dateString) {
-            var regEx = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateString.match(regEx)) return false;  // Formato inválido
-            var d = new Date(dateString);
-            var dNum = d.getTime();
-            if (!dNum && dNum !== 0) return false; // Data inválida
-            return d.toISOString().slice(0, 10) === dateString;
-        }
+      // Função para validar a data
+      function isValidDate(dateString) {
+          var regEx = /^\d{4}-\d{2}-\d{2}$/;
+          if (!dateString.match(regEx)) return false;  // Formato inválido
+          var d = new Date(dateString);
+          var dNum = d.getTime();
+          if (!dNum && dNum !== 0) return false; // Data inválida
+          return d.toISOString().slice(0, 10) === dateString;
+      }
     });
   </script>
 </head>
@@ -142,6 +165,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         <?php endif; ?>
         <form class="main_form" action="acessarSessoes.php?id=<?php echo $idSessao; ?>" method="post">
           <div class="form_group">
+            <div class="form_input">
+              <label for="paciente">Paciente:</label>
+              <input type="text" name="paciente" id="paciente" value="<?php echo isset($sessao['nome_paciente']) ? $sessao['nome_paciente'] : ''; ?>" disabled>
+            </div>
+            <div class="form_input">
+              <label for="aluno">Aluno:</label>
+              <input type="text" name="aluno" id="aluno" value="<?php echo isset($sessao['nome_aluno']) ? $sessao['nome_aluno'] : ''; ?>" disabled>
+            </div>
+            <div class="form_input">
+              <label for="professor">Professor:</label>
+              <input type="text" name="professor" id="professor" value="<?php echo isset($sessao['nome_professor']) ? $sessao['nome_professor'] : ''; ?>" disabled>
+            </div>
             <div class="form_input">
               <label for="data">Data:</label>
               <input type="date" name="data" id="data" value="<?php echo $sessao['data']; ?>" disabled>

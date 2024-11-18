@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['botao']) && $_POST['bo
     <title>MenteSerena</title>
 </head>
 <body>
-    <section>
+    <section class="login_section">
         <div class="login_container">
             <div class="login_logo">
                 <h3>MenteSerena</h3>
