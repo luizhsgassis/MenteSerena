@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $escolaridade = trim($_POST["escolaridade"]);
     $ocupacao = trim($_POST["ocupacao"]);
     $necessidadeEspecial = trim($_POST["necessidade_especial"]);
+    $idUsuarioLogado = $_SESSION['id_usuario'];
 
     // Validações
     if (!validateCPF($cpf)) {
@@ -45,6 +46,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (empty($ocupacao)) {
         $erro_cadastro = "Por favor, preencha a ocupação.";
     } else {
+        // Verificar se o CPF já está cadastrado
+        $queryCPF = "SELECT id_paciente FROM Pacientes WHERE cpf = ?";
+        $stmtCPF = mysqli_prepare($conn, $queryCPF);
+        mysqli_stmt_bind_param($stmtCPF, "s", $cpf);
+        mysqli_stmt_execute($stmtCPF);
+        mysqli_stmt_bind_result($stmtCPF, $idPacienteExistente);
+        mysqli_stmt_fetch($stmtCPF);
+        mysqli_stmt_close($stmtCPF);
+
+        if ($idPacienteExistente) {
+            // Redireciona para a tela de associação
+            header("Location: associarPaciente.php?paciente_id=" . $idPacienteExistente);
+            exit;
+        }
+
         $query = "INSERT INTO Pacientes (cpf, nome, data_nascimento, genero, estado_civil, email, telefone, contato_emergencia, endereco, escolaridade, ocupacao, necessidade_especial) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $query);
@@ -52,6 +68,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         if (mysqli_stmt_execute($stmt)) {
             $idPaciente = mysqli_insert_id($conn);
+
+            // Associar o paciente ao usuário logado
+            $queryAssociacao = "INSERT INTO AssociacaoPacientesAlunos (id_paciente, id_aluno) VALUES (?, ?)";
+            $stmtAssociacao = mysqli_prepare($conn, $queryAssociacao);
+            mysqli_stmt_bind_param($stmtAssociacao, "ii", $idPaciente, $idUsuarioLogado);
+            mysqli_stmt_execute($stmtAssociacao);
+            mysqli_stmt_close($stmtAssociacao);
+
             header("Location: cadastrarProntuario.php?paciente_id=" . $idPaciente);
             exit;
         } else {
@@ -78,7 +102,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (cpf.length !== 11 || !/^\d+$/.test(cpf)) {
                 cpfError.textContent = 'CPF inválido. Deve conter exatamente 11 dígitos.';
             } else {
-                cpfError.textContent = '';
+                // Verificação do CPF via AJAX
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', 'verificarCPF.php', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        if (xhr.responseText === 'existente') {
+                            window.location.href = 'associarPaciente.php?cpf=' + cpf;
+                        } else {
+                            cpfError.textContent = '';
+                        }
+                    }
+                };
+                xhr.send('cpf=' + cpf);
             }
         });
 

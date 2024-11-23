@@ -202,7 +202,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
           <ul>
             <?php while ($arquivo = mysqli_fetch_assoc($resultArquivos)): ?>
               <li>
-                <a href="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>"><?php echo $arquivo['tipo_documento']; ?> (<?php echo $arquivo['data_upload']; ?>)</a>
+                <a href="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>" target="_blank"><?php echo $arquivo['tipo_documento']; ?> (<?php echo $arquivo['data_upload']; ?>)</a>
+                <?php if (strpos($arquivo['tipo_documento'], 'pdf') !== false): ?>
+                  <iframe src="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>" width="100%" height="500px"></iframe>
+                <?php endif; ?>
               </li>
             <?php endwhile; ?>
           </ul>

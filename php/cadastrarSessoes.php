@@ -80,9 +80,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Consulta para obter a lista de pacientes
-$queryPacientes = "SELECT id_paciente, nome FROM Pacientes";
-$resultPacientes = mysqli_query($conn, $queryPacientes);
+// Consulta para obter a lista de pacientes relacionados ao aluno logado
+$queryPacientes = "SELECT p.id_paciente, p.nome 
+                   FROM Pacientes p
+                   INNER JOIN AssociacaoPacientesAlunos apa ON p.id_paciente = apa.id_paciente
+                   WHERE apa.id_aluno = ?";
+$stmtPacientes = mysqli_prepare($conn, $queryPacientes);
+mysqli_stmt_bind_param($stmtPacientes, "i", $idAlunoLogado);
+mysqli_stmt_execute($stmtPacientes);
+$resultPacientes = mysqli_stmt_get_result($stmtPacientes);
 
 // Consulta para obter a lista de professores
 $queryProfessores = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'professor'";
@@ -145,6 +151,13 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                 if (!dNum && dNum !== 0) return false; // Data inválida
                 return d.toISOString().slice(0, 10) === dateString;
             }
+
+            // Atualizar o texto do botão para o nome do documento anexado
+            document.getElementById('arquivo').addEventListener('change', function() {
+                var fileName = this.files[0].name;
+                var fileLabel = document.querySelector('.file_label span');
+                fileLabel.textContent = fileName;
+            });
 
             $('#paciente').change(function() {
                 var pacienteId = $(this).val();

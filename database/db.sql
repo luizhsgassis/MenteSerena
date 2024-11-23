@@ -34,6 +34,14 @@ CREATE TABLE Usuarios (
     ativo BOOLEAN NOT NULL
 );
 
+CREATE TABLE AssociacaoPacientesAlunos (
+    id_associacao INT AUTO_INCREMENT PRIMARY KEY,
+    id_paciente INT,
+    id_aluno INT,
+    FOREIGN KEY (id_paciente) REFERENCES Pacientes(id_paciente),
+    FOREIGN KEY (id_aluno) REFERENCES Usuarios(id_usuario)
+);
+
 CREATE TABLE Prontuarios (
     id_prontuario INT AUTO_INCREMENT PRIMARY KEY,
     id_paciente INT,

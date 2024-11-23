@@ -137,8 +137,14 @@ switch ($tipo) {
         $detalheUrl = 'acessarSessoes.php'; // Redireciona para a sessão específica
         break;
     case 'pacientes':
-    default:
-        $query = "SELECT * FROM Pacientes";
+        if ($nivelAcesso == 'aluno') {
+            $query = "SELECT p.id_paciente, p.cpf, p.nome, p.data_nascimento, p.genero, p.email, p.telefone
+                        FROM Pacientes p
+                        INNER JOIN AssociacaoPacientesAlunos apa ON p.id_paciente = apa.id_paciente
+                        WHERE apa.id_aluno = $idUsuarioLogado";
+        } else {
+            $query = "SELECT * FROM Pacientes";
+        }
         $titulo = "Pacientes";
         $colunas = ['ID', 'CPF', 'Nome', 'Data de Nascimento', 'Gênero', 'Email', 'Telefone'];
         $mapeamento = [

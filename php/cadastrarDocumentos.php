@@ -65,6 +65,48 @@ $resultSessoes = mysqli_query($conn, $querySessoes);
     <link rel="stylesheet" href="../css/sidebar.css">
     <link rel="stylesheet" href="../css/mainContent.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Atualizar o texto do botão para o nome do documento anexado
+            document.getElementById('arquivo').addEventListener('change', function() {
+                var fileName = this.files[0].name;
+                var fileLabel = document.querySelector('.file_label span');
+                fileLabel.textContent = fileName;
+            });
+
+            // Atualizar a lista de sessões com base no paciente selecionado
+            document.getElementById('paciente').addEventListener('change', function() {
+                var pacienteId = this.value;
+                var sessaoSelect = document.getElementById('sessao');
+                sessaoSelect.innerHTML = '<option value="">Selecione uma sessão</option>'; // Limpar as opções atuais
+
+                if (pacienteId) {
+                    // Desbloquear o campo de sessão
+                    sessaoSelect.removeAttribute('disabled');
+
+                    // Fazer uma requisição AJAX para obter as sessões do paciente selecionado
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'obterSessoes.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            var sessoes = JSON.parse(xhr.responseText);
+                            sessoes.forEach(function(sessao) {
+                                var option = document.createElement('option');
+                                option.value = sessao.id_sessao;
+                                option.textContent = sessao.registro_sessao;
+                                sessaoSelect.appendChild(option);
+                            });
+                        }
+                    };
+                    xhr.send('paciente_id=' + pacienteId);
+                } else {
+                    // Bloquear o campo de sessão se nenhum paciente for selecionado
+                    sessaoSelect.setAttribute('disabled', 'disabled');
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="body_section">
@@ -94,13 +136,8 @@ $resultSessoes = mysqli_query($conn, $querySessoes);
                         </div>
                         <div class="form_input">
                             <label for="sessao">Sessão:</label>
-                            <select name="sessao" id="sessao" required>
+                            <select name="sessao" id="sessao" required disabled>
                                 <option value="">Selecione uma sessão</option>
-                                <?php
-                                while ($row = mysqli_fetch_assoc($resultSessoes)) {
-                                    echo '<option value="' . $row['id_sessao'] . '">' . $row['registro_sessao'] . '</option>';
-                                }
-                                ?>
                             </select>
                         </div>
                         <div class="form_input">
