@@ -196,7 +196,7 @@ $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
             <tbody>
               <?php if (mysqli_num_rows($resultSessoes) > 0): ?>
                 <?php while ($sessao = mysqli_fetch_assoc($resultSessoes)): ?>
-                  <tr>
+                  <tr onclick="window.location.href='acessarSessoes.php?id=<?php echo $sessao['id_sessao']; ?>'">
                     <td><?php echo $sessao['id_sessao']; ?></td>
                     <td><?php echo date('d/m/Y', strtotime($sessao['data'])); ?></td>
                     <td><?php echo $sessao['registro_sessao']; ?></td>

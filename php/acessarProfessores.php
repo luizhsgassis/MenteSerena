@@ -30,6 +30,8 @@ if (!$professor) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Concluído') {
+
+
     $cpf = trim($_POST["cpf"]);
     $nome = trim($_POST["nome"]);
     $dataNascimento = trim($_POST["data_nascimento"]);
@@ -39,8 +41,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     $especialidade = trim($_POST["especialidade"]);
     $email = trim($_POST["email"]);
     $telefone = trim($_POST["telefone"]);
-    $login = trim($_POST["login"]);
-    $novaSenha = trim($_POST["nova_senha"]);
 
     // Validações
     if (!validateCPF($cpf)) {
@@ -59,22 +59,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         $erro_acesso = "E-mail inválido.";
     } elseif (!validateTelefone($telefone)) {
         $erro_acesso = "Telefone inválido. Deve conter exatamente 11 dígitos.";
-    } elseif (empty($login)) {
-        $erro_acesso = "Por favor, preencha o login.";
     } else {
-        $queryUpdate = "UPDATE Usuarios SET cpf = ?, nome = ?, data_nascimento = ?, genero = ?, data_contratacao = ?, formacao = ?, especialidade = ?, email = ?, telefone = ?, login = ? WHERE id_usuario = ?";
+        $queryUpdate = "UPDATE Usuarios SET cpf = ?, nome = ?, data_nascimento = ?, genero = ?, data_contratacao = ?, formacao = ?, especialidade = ?, email = ?, telefone = ? WHERE id_usuario = ?";
         $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmtUpdate, "ssssssssssi", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $login, $idProfessor);
+        mysqli_stmt_bind_param($stmtUpdate, "sssssssssi", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $idProfessor);
 
         if (mysqli_stmt_execute($stmtUpdate)) {
-            if (!empty($novaSenha)) {
-                $senhaHash = password_hash($novaSenha, PASSWORD_DEFAULT);
-                $querySenha = "UPDATE Usuarios SET senha = ? WHERE id_usuario = ?";
-                $stmtSenha = mysqli_prepare($conn, $querySenha);
-                mysqli_stmt_bind_param($stmtSenha, "si", $senhaHash, $idProfessor);
-                mysqli_stmt_execute($stmtSenha);
-                mysqli_stmt_close($stmtSenha);
-            }
             $sucesso_acesso = "Dados do professor atualizados com sucesso!";
             // Recarrega a página para mostrar os dados atualizados
             header("Location: acessarProfessores.php?id=" . $idProfessor);
@@ -85,6 +75,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         mysqli_stmt_close($stmtUpdate);
     }
 }
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Restaurar Login e Senha') {
+  // Recupera os valores do banco de dados para o professor
+  $nome = $professor['nome'];
+  $telefone = $professor['telefone'];
+  $cpf = $professor['cpf'];
+  $dataNascimento = $professor['data_nascimento'];
+
+  // Gera o novo login
+  $login = substr($nome, 0, 3) . substr($telefone, -3);
+  $login = strtolower($login); // Transforma em letras minúsculas
+
+  // Gera a nova senha
+  $anoNascimento = substr($dataNascimento, -2); 
+  $senha = substr($cpf, 0, 3) . $anoNascimento;
+
+  // Atualiza o banco de dados
+  $queryUpdateLoginSenha = "UPDATE Usuarios SET login = ?, senha = ? WHERE id_usuario = ?";
+  $stmtUpdateLoginSenha = mysqli_prepare($conn, $queryUpdateLoginSenha);
+  $senhaHash = password_hash($senha, PASSWORD_DEFAULT); // Hash da senha para segurança
+
+  mysqli_stmt_bind_param($stmtUpdateLoginSenha, "ssi", $login, $senhaHash, $idProfessor);
+
+  if (mysqli_stmt_execute($stmtUpdateLoginSenha)) {
+      $sucesso_acesso = "Login e senha restaurados com sucesso!";
+  } else {
+      $erro_acesso = "Erro ao restaurar login e senha: " . mysqli_error($conn);
+  }
+
+  mysqli_stmt_close($stmtUpdateLoginSenha);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -99,12 +121,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     document.addEventListener('DOMContentLoaded', function() {
         const alterarBtn = document.getElementById('alterarBtn');
         const concluidoBtn = document.getElementById('concluidoBtn');
+        const restaurarLoginBtn = document.getElementById('restaurarLoginBtn');
         const formInputs = document.querySelectorAll('.main_form input');
 
         alterarBtn.addEventListener('click', function() {
             formInputs.forEach(input => input.disabled = false);
             alterarBtn.disabled = true;
             concluidoBtn.disabled = false;
+            restaurarLoginBtn.disabled = false;
         });
 
         // Validação do CPF
@@ -212,18 +236,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
               <label for="telefone">Telefone:</label>
               <input type="text" name="telefone" id="telefone" value="<?php echo $professor['telefone']; ?>" disabled>
             </div>
-            <div class="form_input">
-              <label for="login">Login:</label>
-              <input type="text" name="login" id="login" value="<?php echo $professor['login']; ?>" disabled>
-            </div>
-            <div class="form_input">
-              <label for="nova_senha">Nova Senha:</label>
-              <input type="password" name="nova_senha" id="nova_senha" disabled>
-            </div>
           </div>
           <div class="form_group full_width">
             <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
             <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
+            <button type="submit" id="restaurarLoginBtn" class="botao_azul text_button" name="botao" value="Restaurar Login e Senha" disabled>Restaurar Login e Senha</button>
             <a href="mainContent.php?tipo=professores" class="botao_azul text_button">Voltar</a>
           </div>
         </form>
