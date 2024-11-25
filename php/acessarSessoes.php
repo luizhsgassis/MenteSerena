@@ -46,7 +46,7 @@ if (!$sessao) {
     $erro_acesso = "Sessão não encontrada.";
 }
 // Consulta para obter os arquivos anexados à sessão
-$queryArquivos = "SELECT id_arquivo, tipo_documento, data_upload FROM ArquivosDigitalizados WHERE id_sessao = ?";
+$queryArquivos = "SELECT id_arquivo, tipo_documento, nome_original, data_upload FROM ArquivosDigitalizados WHERE id_sessao = ?";
 $stmtArquivos = mysqli_prepare($conn, $queryArquivos);
 mysqli_stmt_bind_param($stmtArquivos, "i", $idSessao);
 mysqli_stmt_execute($stmtArquivos);
@@ -198,14 +198,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
           </div>
         </form>
         <div class="file_list">
-          <h3>Arquivos Anexados</h3>
-          <ul>
+         <h3>Arquivos Anexados</h3>
+         <ul>
             <?php while ($arquivo = mysqli_fetch_assoc($resultArquivos)): ?>
               <li>
-                <a href="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>" target="_blank"><?php echo $arquivo['tipo_documento']; ?> (<?php echo $arquivo['data_upload']; ?>)</a>
-                <?php if (strpos($arquivo['tipo_documento'], 'pdf') !== false): ?>
-                  <iframe src="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>" width="100%" height="500px"></iframe>
-                <?php endif; ?>
+                <a href="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>" target="_blank">
+                  <?php echo $arquivo['nome_original']; ?> 
+                  (<?php echo date("d/m/Y", strtotime($arquivo['data_upload'])); ?>)
+                </a>
               </li>
             <?php endwhile; ?>
           </ul>

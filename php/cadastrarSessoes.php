@@ -53,15 +53,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $arquivoData = date('Y-m-d');
             $arquivoConteudo = file_get_contents($arquivoTmp);
 
-            // Inserir dados na tabela ArquivosDigitalizados
-            $queryArquivo = "INSERT INTO ArquivosDigitalizados (id_paciente, id_usuario, id_sessao, tipo_documento, data_upload, arquivo) VALUES (?, ?, ?, ?, ?, ?)";
-            $stmtArquivo = mysqli_prepare($conn, $queryArquivo);
-            mysqli_stmt_bind_param($stmtArquivo, "iiisss", $idPaciente, $idUsuario, $idSessao, $arquivoTipo, $arquivoData, $arquivoConteudo);
-
-            if (mysqli_stmt_execute($stmtArquivo)) {
-                $sucesso_cadastro .= " Arquivo anexado com sucesso!";
+            // Detecta o tipo de documento pelo cabeçalho MIME ou extensão
+            $extensao = strtolower(pathinfo($arquivoNome, PATHINFO_EXTENSION));
+            $tiposPermitidos = [
+                'pdf' => 'application/pdf',
+                'jpeg' => 'image/jpeg',
+                'jpg' => 'image/jpeg',
+                'png' => 'image/png',
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'txt' => 'text/plain',
+                'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ];
+            
+            if (!array_key_exists($extensao, $tiposPermitidos) || $arquivoTipo !== $tiposPermitidos[$extensao]) {
+                $erro_cadastro = "O tipo de arquivo não é permitido. Formatos aceitos: PDF, JPG, PNG, DOCX, TEXT, EXCEL";
             } else {
-                $erro_cadastro = "Erro ao anexar o arquivo: " . mysqli_error($conn);
+                $tipoDocumentoDetectado = strtoupper($extensao);
+                // Inserir dados na tabela ArquivosDigitalizados
+                $queryArquivo = "INSERT INTO ArquivosDigitalizados (id_paciente, id_usuario, id_sessao, tipo_documento, data_upload, arquivo, nome_original) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $stmtArquivo = mysqli_prepare($conn, $queryArquivo);
+                mysqli_stmt_bind_param($stmtArquivo, "iiissss", $idPaciente, $idUsuario, $idSessao, $tipoDocumentoDetectado, $arquivoData, $arquivoConteudo, $arquivoNome);
+
+                if (mysqli_stmt_execute($stmtArquivo)) {
+                    $sucesso_cadastro .= " Arquivo anexado com sucesso!";
+                } else {
+                    $erro_cadastro = "Erro ao anexar o arquivo: " . mysqli_error($conn);
+                }
             }
         }
 

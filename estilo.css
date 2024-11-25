@@ -203,6 +203,18 @@ textarea {
     border: none;
 }
 
+.botao_vermelho {
+    background-color: #D32F2F;
+    color: var(--white);
+    padding: 20px 30px;
+    text-decoration: none;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+}
+
 .botao_azul:disabled {
     background-color: var(--light-gray);
     color: var(--black);

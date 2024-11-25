@@ -17,13 +17,13 @@ if (!isset($_GET['id'])) {
 
 $idArquivo = intval($_GET['id']);
 
-// Consulta para obter o arquivo do banco de dados
-$queryArquivo = "SELECT tipo_documento, arquivo, nome_arquivo FROM ArquivosDigitalizados WHERE id_arquivo = ?";
+// Consulta para obter o nome do arquivo, tipo de documento e conteúdo do arquivo
+$queryArquivo = "SELECT nome_original, tipo_documento, arquivo FROM ArquivosDigitalizados WHERE id_arquivo = ?";
 $stmtArquivo = mysqli_prepare($conn, $queryArquivo);
 mysqli_stmt_bind_param($stmtArquivo, "i", $idArquivo);
 mysqli_stmt_execute($stmtArquivo);
 mysqli_stmt_store_result($stmtArquivo);
-mysqli_stmt_bind_result($stmtArquivo, $tipoDocumento, $arquivo, $nomeArquivo);
+mysqli_stmt_bind_result($stmtArquivo, $nomeArquivo, $tipoDocumento, $arquivo);
 mysqli_stmt_fetch($stmtArquivo);
 
 if (mysqli_stmt_num_rows($stmtArquivo) == 0) {

@@ -224,7 +224,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
           <div class="form_group full_width">
             <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
             <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
-            <a href="mainContent.php?tipo=usuarios" class="botao_azul text_button">Voltar</a>
           </div>
         </form>
       </div>

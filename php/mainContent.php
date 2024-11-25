@@ -16,6 +16,9 @@ $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'pacientes';
 $nivelAcesso = $_SESSION['UsuarioNivel'];
 $idUsuarioLogado = $_SESSION['id_usuario'];
 
+// Definir um valor padrão para a variável $query
+$query = ''; // Inicializando a variável $query
+
 switch ($tipo) {
     case 'professores':
         // Verifica se o usuário é administrador
@@ -98,10 +101,10 @@ switch ($tipo) {
                       LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario";
         }
         $titulo = "Sessões";
-        $colunas = ['ID', 'Prontuário', 'Paciente', 'Usuário', 'Data', 'Registro da Sessão', 'Anotações'];
+        $colunas = ['ID', 'Paciente', 'Usuário', 'Data', 'Registro da Sessão', 'Anotações'];
         $mapeamento = [
             'ID' => 'id_sessao',
-            'Prontuário' => 'consideracoes_finais',
+            
             'Paciente' => 'nome_paciente',
             'Usuário' => 'nome_usuario',
             'Data' => 'data',
@@ -158,9 +161,19 @@ switch ($tipo) {
         ];
         $detalheUrl = 'acessarPacientes.php';
         break;
+    default:
+        // Valor default para evitar que a variável $query seja indefinida
+        $query = "SELECT * FROM Usuarios";
+        break;
 }
 
-$result = mysqli_query($conn, $query);
+// Verifica se a variável $query não está vazia
+if (!empty($query)) {
+    $result = mysqli_query($conn, $query);
+} else {
+    // Caso $query esteja vazia, exibe mensagem de erro
+    echo "Erro na consulta.";
+}
 ?>
 
 <!DOCTYPE html>

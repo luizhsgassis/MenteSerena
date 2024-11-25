@@ -75,6 +75,7 @@ CREATE TABLE ArquivosDigitalizados (
     id_sessao INT,
     tipo_documento VARCHAR(20) NOT NULL,
     data_upload DATE NOT NULL,
+    nome_original VARCHAR(255) NOT NULL,
     arquivo LONGBLOB,
     FOREIGN KEY (id_paciente) REFERENCES Pacientes(id_paciente),
     FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario),

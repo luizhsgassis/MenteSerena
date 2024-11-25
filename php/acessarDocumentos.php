@@ -29,29 +29,46 @@ if (!$documento) {
     $erro_acesso = "Documento não encontrado.";
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Concluído') {
-    $tipoDocumento = trim($_POST["tipo_documento"]);
-    $dataUpload = trim($_POST["data_upload"]);
-
-    // Validações
-    if (empty($tipoDocumento)) {
-        $erro_acesso = "Por favor, preencha o tipo de documento.";
-    } elseif (empty($dataUpload) || !validateDate($dataUpload)) {
-        $erro_acesso = "Por favor, preencha uma data de upload válida.";
-    } else {
-        $queryUpdate = "UPDATE ArquivosDigitalizados SET tipo_documento = ?, data_upload = ? WHERE id_arquivo = ?";
-        $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmtUpdate, "ssi", $tipoDocumento, $dataUpload, $idDocumento);
-
-        if (mysqli_stmt_execute($stmtUpdate)) {
-            $sucesso_acesso = "Dados do documento atualizados com sucesso!";
-            // Recarrega a página para mostrar os dados atualizados
-            header("Location: acessarDocumentos.php?id=" . $idDocumento);
+// Lógica para deletar o documento
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao'])) {
+    if ($_POST['botao'] == 'Deletar') {
+        $queryDelete = "DELETE FROM ArquivosDigitalizados WHERE id_arquivo = ?";
+        $stmtDelete = mysqli_prepare($conn, $queryDelete);
+        mysqli_stmt_bind_param($stmtDelete, "i", $idDocumento);
+        
+        if (mysqli_stmt_execute($stmtDelete)) {
+            $sucesso_acesso = "Documento deletado com sucesso!";
+            // Redireciona para a página de documentos após a deleção
+            header("Location: mainContent.php?tipo=documentos");
             exit;
         } else {
-            $erro_acesso = "Erro ao atualizar os dados do documento: " . mysqli_error($conn);
+            $erro_acesso = "Erro ao deletar o documento: " . mysqli_error($conn);
         }
-        mysqli_stmt_close($stmtUpdate);
+        mysqli_stmt_close($stmtDelete);
+    } elseif ($_POST['botao'] == 'Concluído') {
+        $tipoDocumento = trim($_POST["tipo_documento"]);
+        $dataUpload = trim($_POST["data_upload"]);
+
+        // Validações
+        if (empty($tipoDocumento)) {
+            $erro_acesso = "Por favor, preencha o tipo de documento.";
+        } elseif (empty($dataUpload) || !validateDate($dataUpload)) {
+            $erro_acesso = "Por favor, preencha uma data de upload válida.";
+        } else {
+            $queryUpdate = "UPDATE ArquivosDigitalizados SET tipo_documento = ?, data_upload = ? WHERE id_arquivo = ?";
+            $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+            mysqli_stmt_bind_param($stmtUpdate, "ssi", $tipoDocumento, $dataUpload, $idDocumento);
+
+            if (mysqli_stmt_execute($stmtUpdate)) {
+                $sucesso_acesso = "Dados do documento atualizados com sucesso!";
+                // Recarrega a página para mostrar os dados atualizados
+                header("Location: acessarDocumentos.php?id=" . $idDocumento);
+                exit;
+            } else {
+                $erro_acesso = "Erro ao atualizar os dados do documento: " . mysqli_error($conn);
+            }
+            mysqli_stmt_close($stmtUpdate);
+        }
     }
 }
 ?>
@@ -80,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         document.getElementById('data_upload').addEventListener('blur', function() {
             var dataUpload = this.value;
             var dataUploadError = document.getElementById('dataUploadError');
-            if (!isValidDate(dataUpload)) {
+            if (! isValidDate(dataUpload)) {
                 dataUploadError.textContent = 'Por favor, preencha uma data de upload válida.';
             } else {
                 dataUploadError.textContent = '';
@@ -126,6 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
           <div class="form_group full_width">
             <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
             <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
+            <button type="submit" class="botao_azul text_button" name="botao" value="Deletar">Deletar</button>
             <a href="mainContent.php?tipo=documentos" class="botao_azul text_button">Voltar</a>
           </div>
         </form>
