@@ -62,6 +62,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     }
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Baixar Prontuário') {
+    $id = isset($_GET['paciente_id']) ? $_GET['paciente_id'] : '';
+    if ($id <= 0) {
+        die("ID inválido.");
+    }
+
+    // Consulta para obter o nome do paciente
+    $queryPaciente = "SELECT nome FROM Pacientes WHERE id_paciente = ?";
+    $stmtPaciente = mysqli_prepare($conn, $queryPaciente);
+    mysqli_stmt_bind_param($stmtPaciente, "i", $id);
+    mysqli_stmt_execute($stmtPaciente);
+    mysqli_stmt_bind_result($stmtPaciente, $nomePaciente);
+    mysqli_stmt_fetch($stmtPaciente);
+    mysqli_stmt_close($stmtPaciente);
+
+    // Consulta para obter os dados do prontuário
+    $sql = "SELECT * FROM Prontuarios WHERE id_paciente = $id";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        // Pega os dados da linha
+        $row = $result->fetch_assoc();
+
+        // Monta o conteúdo do arquivo
+        $content = "Prontuário do Paciente: $nomePaciente\n\n";
+        $content .= "Dados do Prontuário\n";
+        $content .= "-------------------\n";
+        $content .= "Data de Abertura: " . $row['data_abertura'] . "\n";
+        $content .= "Histórico Familiar: " . $row['historico_familiar'] . "\n";
+        $content .= "Histórico Social: " . $row['historico_social'] . "\n";
+        $content .= "Considerações Finais: " . $row['consideracoes_finais'] . "\n";
+
+        // Configura os headers para download do arquivo
+        header('Content-Type: text/plain');
+        header('Content-Disposition: attachment; filename="' . $nomePaciente . '_prontuario.txt"');
+        header('Content-Length: ' . strlen($content));
+
+        // Envia o conteúdo
+        echo $content;
+        exit;
+    } else {
+        echo "Nenhuma linha encontrada.";
+    }
+}
+
 // Consulta para obter as sessões do prontuário
 if ($nivelAcesso == 'aluno') {
     $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
@@ -80,6 +125,7 @@ if ($nivelAcesso == 'aluno') {
 }
 mysqli_stmt_execute($stmtSessoes);
 $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
+
 ?>
 
 <!DOCTYPE html>
@@ -100,12 +146,14 @@ $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
     document.addEventListener('DOMContentLoaded', function() {
         const alterarBtn = document.getElementById('alterarBtn');
         const concluidoBtn = document.getElementById('concluidoBtn');
+        const baixarBtn = document.getElementById('baixarBtn');
         const formInputs = document.querySelectorAll('.main_form input, .main_form textarea, .main_form select');
 
         alterarBtn.addEventListener('click', function() {
             formInputs.forEach(input => input.disabled = false);
             alterarBtn.disabled = true;
             concluidoBtn.disabled = false;
+            baixarBtn.disabled = false;
         });
 
         // Validação da data de abertura
@@ -146,15 +194,6 @@ $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
         <form class="main_form" action="acessarProntuario.php?paciente_id=<?php echo $idPaciente; ?>" method="post">
           <div class="form_group full_width">
             <div class="form_input">
-              <label for="professor">Professor:</label>
-              <select name="professor" id="professor" disabled>
-                <option value="">Selecione um professor</option>
-                <?php while ($professor = mysqli_fetch_assoc($resultProfessores)): ?>
-                  <option value="<?php echo $professor['id_usuario']; ?>" <?php echo ($prontuario['id_professor'] == $professor['id_usuario']) ? 'selected' : ''; ?>>
-                    <?php echo $professor['nome']; ?>
-                  </option>
-                <?php endwhile; ?>
-              </select>
             </div>
             <div class="form_input">
               <label for="data_abertura">Data de Abertura:</label>
@@ -177,6 +216,7 @@ $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
           <div class="form_group full_width">
             <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
             <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
+            <button type="submit" id="baixarBtn" class="botao_azul text_button" name="botao" value="Baixar Prontuário" disabled>Baixar Prontuário</button>
             <a href="acessarPacientes.php?id=<?php echo $idPaciente; ?>" class="botao_azul text_button">Voltar</a>
           </div>
         </form>

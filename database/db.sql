@@ -34,6 +34,12 @@ CREATE TABLE Usuarios (
     ativo BOOLEAN NOT NULL
 );
 
+CREATE TABLE Professores (
+    id_professor INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario)
+);
+
 CREATE TABLE AssociacaoPacientesAlunos (
     id_associacao INT AUTO_INCREMENT PRIMARY KEY,
     id_paciente INT,
@@ -59,13 +65,15 @@ CREATE TABLE Sessoes (
     id_prontuario INT,
     id_paciente INT,
     id_usuario INT,
+    id_professor INT,
     data DATE NOT NULL,
     registro_sessao TEXT,
     anotacoes TEXT,
     rascunho BOOLEAN NOT NULL DEFAULT 1,
     FOREIGN KEY (id_prontuario) REFERENCES Prontuarios(id_prontuario),
     FOREIGN KEY (id_paciente) REFERENCES Pacientes(id_paciente),
-    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario)
+    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario),
+    FOREIGN KEY (id_professor) REFERENCES Professores(id_professor)
 );
 
 CREATE TABLE ArquivosDigitalizados (
@@ -100,18 +108,26 @@ VALUES ('00000000000', 'Administrador', '1980-01-01', 'Masculino', '2023-01-01',
 -- Inserir usuário professor
 INSERT INTO Usuarios (cpf, nome, data_nascimento, genero, data_contratacao, formacao, tipo_usuario, especialidade, email, telefone, login, senha, ativo)
 VALUES ('11111111111', 'Professor', '1985-05-15', 'Masculino', '2023-01-01', 'Educação', 'professor', 'Matemática', 'professor@example.com', '11111111111', 'professor', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1),
-('88888888888', 'Professor 1', '1980-01-01', 'Masculino', '2023-01-01', 'Educação', 'professor', 'História', 'professor1@example.com', '8888888888', 'professor1', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1),
-('99999999999', 'Professor 2', '1981-02-02', 'Feminino', '2023-01-01', 'Educação', 'professor', 'Geografia', 'professor2@example.com', '9999999999', 'professor2', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1),
-('10101010101', 'Professor 3', '1982-03-03', 'Outro', '2023-01-01', 'Educação', 'professor', 'Física', 'professor3@example.com', '1010101010', 'professor3', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1);
+('88888888888', 'Mariana Oliveira', '1980-01-01', 'Feminino', '2023-01-01', 'Educação', 'professor', 'História', 'mariana.oliveira@example.com', '8888888888', 'mariana.oliveira', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1),
+('99999999999', 'Roberto Costa', '1981-02-02', 'Masculino', '2023-01-01', 'Educação', 'professor', 'Geografia', 'roberto.costa@example.com', '9999999999', 'roberto.costa', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1),
+('10101010101', 'Fernanda Lima', '1982-03-03', 'Feminino', '2023-01-01', 'Educação', 'professor', 'Física', 'fernanda.lima@example.com', '1010101010', 'fernanda.lima', '$2y$10$yyjbrso/cnAV0HDcwoCXUePsF3AVtibCSwCNViZVt28BTHbLx3Qrm', 1);
+
+-- Inserir professores na tabela Professores
+INSERT INTO Professores (id_usuario)
+VALUES 
+((SELECT id_usuario FROM Usuarios WHERE cpf = '11111111111')),
+((SELECT id_usuario FROM Usuarios WHERE cpf = '88888888888')),
+((SELECT id_usuario FROM Usuarios WHERE cpf = '99999999999')),
+((SELECT id_usuario FROM Usuarios WHERE cpf = '10101010101'));
 
 -- Inserir usuário aluno
 INSERT INTO Usuarios (cpf, nome, data_nascimento, genero, data_contratacao, formacao, tipo_usuario, especialidade, email, telefone, login, senha, ativo)
 VALUES ('22222222222', 'Aluno', '1995-10-20', 'Feminino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'aluno@example.com', '22222222222', 'aluno', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
-('33333333333', 'Aluno 1', '1996-01-01', 'Masculino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'aluno1@example.com', '3333333333', 'aluno1', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
-('44444444444', 'Aluno 2', '1997-02-02', 'Feminino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'aluno2@example.com', '4444444444', 'aluno2', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
-('55555555555', 'Aluno 3', '1998-03-03', 'Outro', '2023-01-01', 'Psicologia', 'aluno', NULL, 'aluno3@example.com', '5555555555', 'aluno3', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
-('66666666666', 'Aluno 4', '1999-04-04', 'Masculino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'aluno4@example.com', '6666666666', 'aluno4', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
-('77777777777', 'Aluno 5', '2000-05-05', 'Feminino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'aluno5@example.com', '7777777777', 'aluno5', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1);
+('33333333333', 'Pedro Almeida', '1996-01-01', 'Masculino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'pedro.almeida@example.com', '3333333333', 'pedro.almeida', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
+('44444444444', 'Julia Santos', '1997-02-02', 'Feminino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'julia.santos@example.com', '4444444444', 'julia.santos', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
+('55555555555', 'Rafael Costa', '1998-03-03', 'Outro', '2023-01-01', 'Psicologia', 'aluno', NULL, 'rafael.costa@example.com', '5555555555', 'rafael.costa', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
+('66666666666', 'Lucas Oliveira', '1999-04-04', 'Masculino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'lucas.oliveira@example.com', '6666666666', 'lucas.oliveira', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1),
+('77777777777', 'Mariana Lima', '2000-05-05', 'Feminino', '2023-01-01', 'Psicologia', 'aluno', NULL, 'mariana.lima@example.com', '7777777777', 'mariana.lima', '$2y$10$DEs3QMHFwok6qkIlMC2yD.d271UaZnfDUstFg.PsxwCHdvmL06u1q', 1);
 
 -- Inserir 10 pacientes
 INSERT INTO Pacientes (cpf, nome, data_nascimento, genero, estado_civil, email, telefone, contato_emergencia, endereco, escolaridade, ocupacao, necessidade_especial)

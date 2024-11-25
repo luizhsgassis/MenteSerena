@@ -17,11 +17,12 @@ $erro_acesso = '';
 $sucesso_acesso = '';
 
 // Consulta para obter as informações adicionais da sessão
-$querySessao = "SELECT s.*, p.nome AS nome_paciente, u.nome AS nome_aluno, pr.nome AS nome_professor
+$querySessao = "SELECT s.*, p.nome AS nome_paciente, u.nome AS nome_aluno, pr.id_professor, up.nome AS nome_professor
                 FROM Sessoes s
                 LEFT JOIN Pacientes p ON s.id_paciente = p.id_paciente
                 LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
-                LEFT JOIN Usuarios pr ON s.id_usuario = pr.id_usuario
+                LEFT JOIN Professores pr ON s.id_professor = pr.id_professor
+                LEFT JOIN Usuarios up ON pr.id_usuario = up.id_usuario
                 WHERE s.id_sessao = ?";
 $stmtSessao = mysqli_prepare($conn, $querySessao);
 mysqli_stmt_bind_param($stmtSessao, "i", $idSessao);

@@ -46,6 +46,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $loginPlaceholder2 = substr($telefone, -3);
         $loginTemporario = $loginPlaceholder1 . $loginPlaceholder2;
 
+        // Verifica se o login já existe no banco de dados
+        $queryCheckLogin = "SELECT COUNT(*) AS count FROM Usuarios WHERE login = ?";
+        $stmtCheckLogin = mysqli_prepare($conn, $queryCheckLogin);
+        mysqli_stmt_bind_param($stmtCheckLogin, "s", $loginTemporario);
+        mysqli_stmt_execute($stmtCheckLogin);
+        $resultCheckLogin = mysqli_stmt_get_result($stmtCheckLogin);
+        $rowCheckLogin = mysqli_fetch_assoc($resultCheckLogin);
+
+        if ($rowCheckLogin['count'] > 0) {
+            // Se já existe, ajusta o login
+            $loginPlaceholder3 = substr($telefone, 0, 3); 
+            $loginTemporario = $loginTemporario. $loginPlaceholder3;
+        }
+
         $senhaPlaceholder1 = substr($cpf, 0, 3);
         $senhaPlaceholder2 = substr($dataNascimento, -2);
         $senhaTemporaria = $senhaPlaceholder1 . $senhaPlaceholder2;

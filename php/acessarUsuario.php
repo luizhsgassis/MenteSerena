@@ -62,27 +62,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     } elseif (empty($login)) {
         $erro_acesso = "Por favor, preencha o login.";
     } else {
-        $queryUpdate = "UPDATE Usuarios SET cpf = ?, nome = ?, data_nascimento = ?, genero = ?, data_contratacao = ?, formacao = ?, especialidade = ?, email = ?, telefone = ?, login = ? WHERE id_usuario = ?";
-        $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmtUpdate, "ssssssssssi", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $login, $idUsuario);
+        // Verifica se o login já existe no banco de dados
+        $queryCheckLogin = "SELECT COUNT(*) AS count FROM Usuarios WHERE login = ? AND id_usuario != ?";
+        $stmtCheckLogin = mysqli_prepare($conn, $queryCheckLogin);
+        mysqli_stmt_bind_param($stmtCheckLogin, "si", $login, $idUsuario);
+        mysqli_stmt_execute($stmtCheckLogin);
+        $resultCheckLogin = mysqli_stmt_get_result($stmtCheckLogin);
+        $rowCheckLogin = mysqli_fetch_assoc($resultCheckLogin);
+        mysqli_stmt_close($stmtCheckLogin);
 
-        if (mysqli_stmt_execute($stmtUpdate)) {
-            if (!empty($novaSenha)) {
-                $senhaHash = password_hash($novaSenha, PASSWORD_DEFAULT);
-                $querySenha = "UPDATE Usuarios SET senha = ? WHERE id_usuario = ?";
-                $stmtSenha = mysqli_prepare($conn, $querySenha);
-                mysqli_stmt_bind_param($stmtSenha, "si", $senhaHash, $idUsuario);
-                mysqli_stmt_execute($stmtSenha);
-                mysqli_stmt_close($stmtSenha);
-            }
-            $sucesso_acesso = "Dados do usuário atualizados com sucesso!";
-            // Recarrega a página para mostrar os dados atualizados
-            header("Location: acessarUsuario.php?id=" . $idUsuario);
-            exit;
+        if ($rowCheckLogin['count'] > 0) {
+            $erro_acesso = "Login já existente. Por favor, escolha outro login.";
         } else {
-            $erro_acesso = "Erro ao atualizar os dados do usuário: " . mysqli_error($conn);
+            $queryUpdate = "UPDATE Usuarios SET cpf = ?, nome = ?, data_nascimento = ?, genero = ?, data_contratacao = ?, formacao = ?, especialidade = ?, email = ?, telefone = ?, login = ? WHERE id_usuario = ?";
+            $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+            mysqli_stmt_bind_param($stmtUpdate, "ssssssssssi", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $login, $idUsuario);
+
+            if (mysqli_stmt_execute($stmtUpdate)) {
+                if (!empty($novaSenha)) {
+                    $senhaHash = password_hash($novaSenha, PASSWORD_DEFAULT);
+                    $querySenha = "UPDATE Usuarios SET senha = ? WHERE id_usuario = ?";
+                    $stmtSenha = mysqli_prepare($conn, $querySenha);
+                    mysqli_stmt_bind_param($stmtSenha, "si", $senhaHash, $idUsuario);
+                    mysqli_stmt_execute($stmtSenha);
+                    mysqli_stmt_close($stmtSenha);
+                }
+                $sucesso_acesso = "Dados do usuário atualizados com sucesso!";
+                // Recarrega a página para mostrar os dados atualizados
+                header("Location: acessarUsuario.php?id=" . $idUsuario);
+                exit;
+            } else {
+                $erro_acesso = "Erro ao atualizar os dados do usuário: " . mysqli_error($conn);
+            }
+            mysqli_stmt_close($stmtUpdate);
         }
-        mysqli_stmt_close($stmtUpdate);
     }
 }
 ?>

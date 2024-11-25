@@ -36,10 +36,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     mysqli_stmt_fetch($stmtProntuario);
     mysqli_stmt_close($stmtProntuario);
 
+    // Consulta para obter o ID do professor com base no ID do usuário
+    $queryProfessor = "SELECT id_professor FROM Professores WHERE id_usuario = ?";
+    $stmtProfessor = mysqli_prepare($conn, $queryProfessor);
+    mysqli_stmt_bind_param($stmtProfessor, "i", $idProfessor);
+    mysqli_stmt_execute($stmtProfessor);
+    mysqli_stmt_bind_result($stmtProfessor, $idProfessorReal);
+    mysqli_stmt_fetch($stmtProfessor);
+    mysqli_stmt_close($stmtProfessor);
+
     // Inserir dados na tabela Sessoes
-    $querySessao = "INSERT INTO Sessoes (id_prontuario, id_paciente, id_usuario, data, registro_sessao, anotacoes, rascunho) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $querySessao = "INSERT INTO Sessoes (id_prontuario, id_paciente, id_usuario, id_professor, data, registro_sessao, anotacoes, rascunho) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmtSessao = mysqli_prepare($conn, $querySessao);
-    mysqli_stmt_bind_param($stmtSessao, "iiisssi", $idProntuario, $idPaciente, $idUsuario, $data, $registroSessao, $anotacoes, $rascunho);
+    mysqli_stmt_bind_param($stmtSessao, "iiiisssi", $idProntuario, $idPaciente, $idAluno, $idProfessorReal, $data, $registroSessao, $anotacoes, $rascunho);
 
     if (mysqli_stmt_execute($stmtSessao)) {
         $idSessao = mysqli_insert_id($conn);

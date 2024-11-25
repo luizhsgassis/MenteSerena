@@ -46,6 +46,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $loginPlaceholder2 = substr($telefone, -3);
         $loginTemporario = $loginPlaceholder1 . $loginPlaceholder2;
 
+        // Verifica se o login já existe no banco de dados
+        $queryCheckLogin = "SELECT COUNT(*) AS count FROM Usuarios WHERE login = ?";
+        $stmtCheckLogin = mysqli_prepare($conn, $queryCheckLogin);
+        mysqli_stmt_bind_param($stmtCheckLogin, "s", $loginTemporario);
+        mysqli_stmt_execute($stmtCheckLogin);
+        $resultCheckLogin = mysqli_stmt_get_result($stmtCheckLogin);
+        $rowCheckLogin = mysqli_fetch_assoc($resultCheckLogin);
+
+        if ($rowCheckLogin['count'] > 0) {
+            // Se já existe, ajusta o login
+            $loginPlaceholder3 = substr($telefone, 0, 3); 
+            $loginTemporario = $loginTemporario. $loginPlaceholder3;
+        }
+
         $senhaPlaceholder1 = substr($cpf, 0, 3);
         $senhaPlaceholder2 = substr($dataNascimento, -2);
         $senhaTemporaria = $senhaPlaceholder1 . $senhaPlaceholder2;
@@ -60,7 +74,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         mysqli_stmt_bind_param($stmt, "sssssssssss", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $loginTemporario, $senhaHash);
         
         if (mysqli_stmt_execute($stmt)) {
-            $sucesso_cadastro = "Professor cadastrado com sucesso!";
+            // Obter o ID do usuário recém-cadastrado
+            $idUsuario = mysqli_insert_id($conn);
+
+            // Inserir o professor na tabela Professores
+            $queryProfessor = "INSERT INTO Professores (id_usuario) VALUES (?)";
+            $stmtProfessor = mysqli_prepare($conn, $queryProfessor);
+            mysqli_stmt_bind_param($stmtProfessor, "i", $idUsuario);
+
+            if (mysqli_stmt_execute($stmtProfessor)) {
+                $sucesso_cadastro = "Professor cadastrado com sucesso!";
+            } else {
+                $erro_cadastro = "Erro ao cadastrar professor na tabela Professores: " . mysqli_error($conn);
+            }
+
+            mysqli_stmt_close($stmtProfessor);
         } else {
             $erro_cadastro = "Erro ao cadastrar professor: " . mysqli_error($conn);
         }
