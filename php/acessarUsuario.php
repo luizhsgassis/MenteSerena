@@ -55,8 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         $erro_acesso = "Por favor, preencha uma data de contratação válida.";
     } elseif (empty($formacao)) {
         $erro_acesso = "Por favor, preencha a formação.";
-    } elseif (empty($email) || !validateEmail($email)) {
-        $erro_acesso = "E-mail inválido.";
     } elseif (!validateTelefone($telefone)) {
         $erro_acesso = "Telefone inválido. Deve conter exatamente 11 dígitos.";
     } elseif (empty($login)) {
@@ -219,7 +217,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
             </div>
             <div class="form_input">
               <label for="email">Email:</label>
-              <input type="email" name="email" id="email" value="<?php echo $usuario['email']; ?>" disabled>
+              <input type="text" name="email" id="email" value="<?php echo $usuario['email']; ?>" disabled>
             </div>
             <div class="form_input">
               <label for="telefone">Telefone:</label>

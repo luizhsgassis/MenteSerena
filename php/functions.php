@@ -14,9 +14,3 @@ function validateCPF($cpf) {
 function validateTelefone($telefone) {
     return strlen($telefone) == 11 && ctype_digit($telefone);
 }
-
-// Função para validar e-mail
-function validateEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL);
-}
-?>

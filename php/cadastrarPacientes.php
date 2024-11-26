@@ -33,8 +33,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $erro_cadastro = "Por favor, selecione o gênero.";
     } elseif (empty($estadoCivil)) {
         $erro_cadastro = "Por favor, selecione o estado civil.";
-    } elseif (empty($email) || !validateEmail($email)) {
-        $erro_cadastro = "E-mail inválido.";
     } elseif (!validateTelefone($telefone)) {
         $erro_cadastro = "Telefone inválido. Deve conter exatamente 11 dígitos.";
     } elseif (empty($contatoEmergencia)) {
@@ -199,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <div class="form_input">
               <label for="email">Email:</label>
-              <input type="email" name="email" id="email" required>
+              <input type="text" name="email" id="email" required>
             </div>
             <div class="form_input">
               <label for="telefone">Telefone:</label>

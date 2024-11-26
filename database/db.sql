@@ -3,13 +3,13 @@ USE MenteSerena;
 
 CREATE TABLE Pacientes (
     id_paciente INT AUTO_INCREMENT PRIMARY KEY,
-    cpf VARCHAR(11) NOT NULL,
+    cpf VARCHAR(14) NOT NULL,
     nome VARCHAR(50) NOT NULL,
     data_nascimento DATE NOT NULL,
     genero ENUM('Masculino', 'Feminino', 'Outro') NOT NULL,
     estado_civil ENUM('Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)') NOT NULL,
     email VARCHAR(50) NOT NULL,
-    telefone VARCHAR(11) NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
     contato_emergencia VARCHAR(50) NOT NULL,
     endereco VARCHAR(50) NOT NULL,
     escolaridade VARCHAR(20) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE Pacientes (
 
 CREATE TABLE Usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    cpf VARCHAR(11) NOT NULL,
+    cpf VARCHAR(14) NOT NULL,
     nome VARCHAR(50) NOT NULL,
     data_nascimento DATE NOT NULL,
     genero ENUM('Masculino', 'Feminino', 'Outro') NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE Usuarios (
     tipo_usuario ENUM('aluno', 'professor', 'administrador') NOT NULL,
     especialidade VARCHAR(20),
     email VARCHAR(50) NOT NULL,
-    telefone VARCHAR(11) NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
     login VARCHAR(20) NOT NULL,
     senha VARCHAR(255) NOT NULL,
     ativo BOOLEAN NOT NULL

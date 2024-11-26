@@ -54,8 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         $erro_acesso = "Por favor, selecione o gênero.";
     } elseif (empty($estadoCivil)) {
         $erro_acesso = "Por favor, selecione o estado civil.";
-    } elseif (empty($email) || !validateEmail($email)) {
-        $erro_acesso = "E-mail inválido.";
     } elseif (!validateTelefone($telefone)) {
         $erro_acesso = "Telefone inválido. Deve conter exatamente 11 dígitos.";
     } elseif (empty($contatoEmergencia)) {
@@ -189,7 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
             </div>
             <div class="form_input">
               <label for="email">Email:</label>
-              <input type="email" name="email" id="email" value="<?php echo $paciente['email']; ?>" disabled>
+              <input type="text" name="email" id="email" value="<?php echo $paciente['email']; ?>" disabled>
             </div>
             <div class="form_input">
               <label for="telefone">Telefone:</label>
