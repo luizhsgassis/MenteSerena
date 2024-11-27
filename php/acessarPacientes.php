@@ -57,6 +57,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     }
     mysqli_stmt_close($stmtUpdate);
 }
+
+// Consulta para obter as sessões do prontuário
+if ($nivelAcesso == 'aluno') {
+  $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
+                   FROM Sessoes s 
+                   LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
+                   WHERE s.id_prontuario = ? AND s.id_usuario = ?";
+  $stmtSessoes = mysqli_prepare($conn, $querySessoes);
+  mysqli_stmt_bind_param($stmtSessoes, "ii", $prontuario['id_prontuario'], $idUsuarioLogado);
+} else {
+  $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
+                   FROM Sessoes s 
+                   LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
+                   WHERE s.id_prontuario = ?";
+  $stmtSessoes = mysqli_prepare($conn, $querySessoes);
+  mysqli_stmt_bind_param($stmtSessoes, "i", $prontuario['id_prontuario']);
+}
+mysqli_stmt_execute($stmtSessoes);
+$resultSessoes = mysqli_stmt_get_result($stmtSessoes);
+
 ?>
 
 <!DOCTYPE html>
@@ -276,87 +296,122 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         <?php elseif (!empty($sucesso_acesso)): ?>
           <div class="success"><?php echo $sucesso_acesso; ?></div>
         <?php endif; ?>
-        <form class="main_form" action="acessarPacientes.php?id=<?php echo $idPaciente; ?>" method="post">
-          <div class="form_group">
-            <div class="form_input">
-              <label for="cpf">CPF:</label>
-              <input type="text" name="cpf" id="cpf" value="<?php echo $paciente['cpf']; ?>" disabled>
-              <span id="cpfError" class="error"></span>
+        <div class="leftBlock">
+          <form class="main_form" action="acessarPacientes.php?id=<?php echo $idPaciente; ?>" method="post">
+            <div class="form_group">
+              <div class="form_input">
+                <label for="cpf">CPF:</label>
+                <input type="text" name="cpf" id="cpf" value="<?php echo $paciente['cpf']; ?>" disabled>
+                <span id="cpfError" class="error"></span>
+              </div>
+              <div class="form_input">
+                <label for="nome">Nome:</label>
+                <input type="text" name="nome" id="nome" value="<?php echo $paciente['nome']; ?>" disabled>
+                <span id="nomeError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="data_nascimento">Data de Nascimento:</label>
+                <input type="date" name="data_nascimento" id="data_nascimento" value="<?php echo $paciente['data_nascimento']; ?>" disabled>
+                <span id="dataNascimentoError" class="error"></span>
+              </div>
+              <div class="form_input">
+                <label for="genero">Gênero:</label>
+                <select name="genero" id="genero" disabled>
+                  <option value="">Selecione</option>
+                  <option value="Masculino" <?php echo ($paciente['genero'] == 'Masculino') ? 'selected' : ''; ?>>Masculino</option>
+                  <option value="Feminino" <?php echo ($paciente['genero'] == 'Feminino') ? 'selected' : ''; ?>>Feminino</option>
+                  <option value="Outro" <?php echo ($paciente['genero'] == 'Outro') ? 'selected' : ''; ?>>Outro</option>
+                </select>
+                <span id="generoError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="estado_civil">Estado Civil:</label>
+                <select name="estado_civil" id="estado_civil" disabled>
+                  <option value="">Selecione</option>
+                  <option value="Solteiro(a)" <?php echo ($paciente['estado_civil'] == 'Solteiro(a)') ? 'selected' : ''; ?>>Solteiro(a)</option>
+                  <option value="Casado(a)" <?php echo ($paciente['estado_civil'] == 'Casado(a)') ? 'selected' : ''; ?>>Casado(a)</option>
+                  <option value="Divorciado(a)" <?php echo ($paciente['estado_civil'] == 'Divorciado(a)') ? 'selected' : ''; ?>>Divorciado(a)</option>
+                  <option value="Viúvo(a)" <?php echo ($paciente['estado_civil'] == 'Viúvo(a)') ? 'selected' : ''; ?>>Viúvo(a)</option>
+                </select>
+                <span id="estado_civilError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="email">Email:</label>
+                <input type="text" name="email" id="email" value="<?php echo $paciente['email']; ?>" disabled>
+                <span id="emailError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="telefone">Telefone:</label>
+                <input type="text" name="telefone" id="telefone" value="<?php echo $paciente['telefone']; ?>" disabled>
+                <span id="telefoneError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="contato_emergencia">Contato de Emergência:</label>
+                <input type="text" name="contato_emergencia" id="contato_emergencia" value="<?php echo $paciente['contato_emergencia']; ?>" disabled>
+                <span id="contatoError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="endereco">Endereço:</label>
+                <input type="text" name="endereco" id="endereco" value="<?php echo $paciente['endereco']; ?>" disabled>
+                <span id="enderecoError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="escolaridade">Escolaridade:</label>
+                <input type="text" name="escolaridade" id="escolaridade" value="<?php echo $paciente['escolaridade']; ?>" disabled>
+                <span id="escolaridadeError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="ocupacao">Ocupação:</label>
+                <input type="text" name="ocupacao" id="ocupacao" value="<?php echo $paciente['ocupacao']; ?>" disabled>
+                <span id="ocupacaoError" class="error"></span>
+                </div>
+              <div class="form_input">
+                <label for="necessidade_especial">Necessidade Especial:</label>
+                <input type="text" name="necessidade_especial" id="necessidade_especial" value="<?php echo $paciente['necessidade_especial']; ?>" disabled>
+                <span id="necessidadeError" class="error"></span>
+                </div>
             </div>
-            <div class="form_input">
-              <label for="nome">Nome:</label>
-              <input type="text" name="nome" id="nome" value="<?php echo $paciente['nome']; ?>" disabled>
-              <span id="nomeError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="data_nascimento">Data de Nascimento:</label>
-              <input type="date" name="data_nascimento" id="data_nascimento" value="<?php echo $paciente['data_nascimento']; ?>" disabled>
-              <span id="dataNascimentoError" class="error"></span>
+            <div class="form_group full_width">
+              <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
+              <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
+              <a href="mainContent.php?tipo=pacientes" class="botao_azul text_button">Voltar</a>
+              <a href="acessarProntuario.php?paciente_id=<?php echo $idPaciente; ?>" class="botao_azul text_button">Ver Prontuário</a>
             </div>
-            <div class="form_input">
-              <label for="genero">Gênero:</label>
-              <select name="genero" id="genero" disabled>
-                <option value="">Selecione</option>
-                <option value="Masculino" <?php echo ($paciente['genero'] == 'Masculino') ? 'selected' : ''; ?>>Masculino</option>
-                <option value="Feminino" <?php echo ($paciente['genero'] == 'Feminino') ? 'selected' : ''; ?>>Feminino</option>
-                <option value="Outro" <?php echo ($paciente['genero'] == 'Outro') ? 'selected' : ''; ?>>Outro</option>
-              </select>
-              <span id="generoError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="estado_civil">Estado Civil:</label>
-              <select name="estado_civil" id="estado_civil" disabled>
-                <option value="">Selecione</option>
-                <option value="Solteiro(a)" <?php echo ($paciente['estado_civil'] == 'Solteiro(a)') ? 'selected' : ''; ?>>Solteiro(a)</option>
-                <option value="Casado(a)" <?php echo ($paciente['estado_civil'] == 'Casado(a)') ? 'selected' : ''; ?>>Casado(a)</option>
-                <option value="Divorciado(a)" <?php echo ($paciente['estado_civil'] == 'Divorciado(a)') ? 'selected' : ''; ?>>Divorciado(a)</option>
-                <option value="Viúvo(a)" <?php echo ($paciente['estado_civil'] == 'Viúvo(a)') ? 'selected' : ''; ?>>Viúvo(a)</option>
-              </select>
-              <span id="estado_civilError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="email">Email:</label>
-              <input type="text" name="email" id="email" value="<?php echo $paciente['email']; ?>" disabled>
-              <span id="emailError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="telefone">Telefone:</label>
-              <input type="text" name="telefone" id="telefone" value="<?php echo $paciente['telefone']; ?>" disabled>
-              <span id="telefoneError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="contato_emergencia">Contato de Emergência:</label>
-              <input type="text" name="contato_emergencia" id="contato_emergencia" value="<?php echo $paciente['contato_emergencia']; ?>" disabled>
-              <span id="contatoError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="endereco">Endereço:</label>
-              <input type="text" name="endereco" id="endereco" value="<?php echo $paciente['endereco']; ?>" disabled>
-              <span id="enderecoError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="escolaridade">Escolaridade:</label>
-              <input type="text" name="escolaridade" id="escolaridade" value="<?php echo $paciente['escolaridade']; ?>" disabled>
-              <span id="escolaridadeError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="ocupacao">Ocupação:</label>
-              <input type="text" name="ocupacao" id="ocupacao" value="<?php echo $paciente['ocupacao']; ?>" disabled>
-              <span id="ocupacaoError" class="error"></span>
-              </div>
-            <div class="form_input">
-              <label for="necessidade_especial">Necessidade Especial:</label>
-              <input type="text" name="necessidade_especial" id="necessidade_especial" value="<?php echo $paciente['necessidade_especial']; ?>" disabled>
-              <span id="necessidadeError" class="error"></span>
-              </div>
+          </form>
+        </div>
+        <div class="rightBlock">
+          <h3>Sessões</h3>
+          <div class="table-container">            
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Data</th>
+                  <th>Registro da Sessão</th>
+                  <th>Anotações</th>
+                  <th>Usuário</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (mysqli_num_rows($resultSessoes) > 0): ?>
+                  <?php while ($sessao = mysqli_fetch_assoc($resultSessoes)): ?>
+                    <tr onclick="window.location.href='acessarSessoes.php?id=<?php echo $sessao['id_sessao']; ?>'">
+                      <td><?php echo $sessao['id_sessao']; ?></td>
+                      <td><?php echo date('d/m/Y', strtotime($sessao['data'])); ?></td>
+                      <td><?php echo $sessao['registro_sessao']; ?></td>
+                      <td><?php echo $sessao['anotacoes']; ?></td>
+                      <td><?php echo $sessao['nome_usuario']; ?></td>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr>
+                    <td colspan="5">Nenhuma sessão encontrada</td>
+                  </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
           </div>
-          <div class="form_group full_width">
-            <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
-            <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
-            <a href="mainContent.php?tipo=pacientes" class="botao_azul text_button">Voltar</a>
-            <a href="acessarProntuario.php?paciente_id=<?php echo $idPaciente; ?>" class="botao_azul text_button">Ver Prontuário</a>
-          </div>
-        </form>
+        </div>
       </div>
     </main>
   </div>
