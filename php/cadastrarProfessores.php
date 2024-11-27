@@ -6,7 +6,7 @@ include('functions.php');
 
 // Verifica se o usuário é administrador ou professor
 if ($_SESSION['UsuarioNivel'] == 'aluno') {
-    header("Location: /MenteSerena-master/index.php");
+    header("Location: /MenteSerena-master/php/logout.php");
     exit;
 }
 

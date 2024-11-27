@@ -6,7 +6,7 @@ include('functions.php');
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['id_usuario'])) {
-    header("Location: /MenteSerena-master/index.php");
+    header("Location: /MenteSerena-master/php/logout.php");
     exit;
 }
 

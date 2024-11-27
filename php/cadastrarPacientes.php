@@ -307,10 +307,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               <label for="estado_civil">Estado Civil:</label>
               <select name="estado_civil" id="estado_civil" required>
                 <option value="">Selecione</option>
-                <option value="Solteiro">Solteiro(a)</option>
-                <option value="Casado">Casado(a)</option>
-                <option value="Divorciado">Divorciado(a)</option>
-                <option value="Viúvo">Viúvo(a)</option>
+                <option value="Solteiro(a)">Solteiro(a)</option>
+                <option value="Casado(a)">Casado(a)</option>
+                <option value="Divorciado(a)">Divorciado(a)</option>
+                <option value="Viúvo(a)">Viúvo(a)</option>
               </select>
               <span id="estado_civilError" class="error"></span>
             </div>

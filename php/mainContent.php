@@ -238,19 +238,27 @@ if (!empty($query)) {
                     <?php
                     switch ($tipo) {
                         case 'pacientes':
-                            echo '<a href="cadastrarPacientes.php" class="botao_azul text_button">Cadastrar Paciente</a>';
+                            if ($nivelAcesso != 'administrador') {
+                                echo '<a href="cadastrarPacientes.php" class="botao_azul text_button">Cadastrar Paciente</a>';
+                            }
                             break;
                         case 'alunos':
-                            echo '<a href="cadastrarAlunos.php" class="botao_azul text_button">Cadastrar Aluno</a>';
+                            if ($nivelAcesso != 'administrador') {
+                                echo '<a href="cadastrarAlunos.php" class="botao_azul text_button">Cadastrar Aluno</a>';
+                            }
                             break;
                         case 'professores':
                             echo '<a href="cadastrarProfessores.php" class="botao_azul text_button">Cadastrar Professor</a>';
                             break;
                         case 'documentos':
-                            echo '<a href="cadastrarDocumentos.php" class="botao_azul text_button">Cadastrar Documento</a>';
+                            if ($nivelAcesso != 'administrador') {
+                                echo '<a href="cadastrarDocumentos.php" class="botao_azul text_button">Cadastrar Documento</a>';
+                            }
                             break;
                         case 'sessoes':
-                            echo '<a href="cadastrarSessoes.php" class="botao_azul text_button">Cadastrar Sessão</a>';
+                            if ($nivelAcesso != 'administrador') {
+                                echo '<a href="cadastrarSessoes.php" class="botao_azul text_button">Cadastrar Sessão</a>';
+                            }
                             break;
                     }
                     ?>

@@ -69,6 +69,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
   <link rel="stylesheet" href="../css/mainContent.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js"></script>
+  <style>
+    main {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+  </style>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         const alterarBtn = document.getElementById('alterarBtn');

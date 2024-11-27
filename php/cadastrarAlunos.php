@@ -5,9 +5,9 @@ include('../config.php');
 include('functions.php');
 
 // Verifica se o usuário é administrador ou professor
-if ($_SESSION['UsuarioNivel'] == 'aluno') {
-    header("Location: /MenteSerena-master/index.php");
-    exit;
+if ($_SESSION['UsuarioNivel'] == 'aluno' || $_SESSION['UsuarioNivel'] == 'administrador') {
+  header("Location: /MenteSerena-master/php/logout.php");
+  exit;
 }
 
 $erro_cadastro = '';

@@ -31,12 +31,7 @@ if (!$prontuario) {
     $erro_acesso = "Prontuário não encontrado.";
 }
 
-// Consulta para obter a lista de professores
-$queryProfessores = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'professor'";
-$resultProfessores = mysqli_query($conn, $queryProfessores);
-
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Concluído') {
-    $idProfessor = trim($_POST["professor"]);
     $dataAbertura = trim($_POST["data_abertura"]);
     $historicoFamiliar = trim($_POST["historico_familiar"]);
     $historicoSocial = trim($_POST["historico_social"]);
@@ -46,9 +41,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     if (empty($dataAbertura) || !validateDate($dataAbertura)) {
         $erro_acesso = "Por favor, preencha uma data de abertura válida.";
     } else {
-        $queryUpdate = "UPDATE Prontuarios SET id_professor = ?, data_abertura = ?, historico_familiar = ?, historico_social = ?, consideracoes_finais = ? WHERE id_prontuario = ?";
+        $queryUpdate = "UPDATE Prontuarios SET data_abertura = ?, historico_familiar = ?, historico_social = ?, consideracoes_finais = ? WHERE id_prontuario = ?";
         $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmtUpdate, "issssi", $idProfessor, $dataAbertura, $historicoFamiliar, $historicoSocial, $consideracoesFinais, $prontuario['id_prontuario']);
+        mysqli_stmt_bind_param($stmtUpdate, "issssi", $dataAbertura, $historicoFamiliar, $historicoSocial, $consideracoesFinais, $prontuario['id_prontuario']);
 
         if (mysqli_stmt_execute($stmtUpdate)) {
             $sucesso_acesso = "Dados do prontuário atualizados com sucesso!";
@@ -137,7 +132,7 @@ $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
   <link rel="stylesheet" href="../css/sidebar.css">
   <link rel="stylesheet" href="../css/mainContent.css">
   <style>
-    .content {
+    main {
         max-height: 80vh;
         overflow-y: auto;
     }
