@@ -13,6 +13,16 @@ if ($_SESSION['UsuarioNivel'] == 'aluno' || $_SESSION['UsuarioNivel'] == 'admini
 $erro_cadastro = '';
 $sucesso_cadastro = '';
 
+$idProfessorLogado = $_SESSION['id_usuario'];
+
+$queryProfessorID = "SELECT id_professor FROM Professores WHERE id_usuario = ?";
+$stmtPID = mysqli_prepare($conn, $queryProfessorID);
+mysqli_stmt_bind_param($stmtPID, "i", $idProfessorLogado);
+mysqli_stmt_execute($stmtPID);
+$resultQuery = mysqli_stmt_get_result($stmtPID);
+$idProfessor = mysqli_fetch_assoc($resultQuery);
+mysqli_stmt_close($stmtPID);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $cpf = trim($_POST["cpf"]);
   $nome = trim($_POST["nome"]);
@@ -47,17 +57,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $formacao = NULL;
   $especialidade = NULL;
   $email = NULL;
+  $dataContratacao = date('Y-m-d');
 
-  $query = "INSERT INTO Usuarios (cpf, nome, data_nascimento, genero, data_contratacao, formacao, especialidade, email, telefone, login, senha, tipo_usuario, ativo) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'aluno', 1)";
+  $query = "INSERT INTO Usuarios (cpf, nome, data_nascimento, data_contratacao, telefone, login, senha, tipo_usuario, ativo) 
+  VALUES (?, ?, ?, ?, ?, ?, ?, 'aluno', 1)";
   $stmt = mysqli_prepare($conn, $query);
-  mysqli_stmt_bind_param($stmt, "sssssssssss", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $loginTemporario, $senhaHash);
+  mysqli_stmt_bind_param($stmt, "sssssss", $cpf, $nome, $dataNascimento, $dataContratacao, $telefone, $loginTemporario, $senhaHash);
   
   if (mysqli_stmt_execute($stmt)) {
     $sucesso_cadastro = "Aluno cadastrado com sucesso!";
   } else {
     $erro_cadastro = "Erro ao cadastrar aluno: " . mysqli_error($conn);
   }
+  mysqli_stmt_close($stmt);
+    $queryIDA = "SELECT id_usuario FROM Usuarios WHERE cpf = ?";
+    $stmtIDA = mysqli_prepare($conn, $queryIDA);
+    mysqli_stmt_bind_param($stmtIDA, "s", $cpf); // Ensure binding as string if cpf is not an integer
+    mysqli_stmt_execute($stmtIDA);
+    $resultIDA = mysqli_stmt_get_result($stmtIDA);
+    
+    if ($row = mysqli_fetch_assoc($resultIDA)) {
+        $idRecemCriadoUsuario = $row;
+    } else {
+        echo "User not found after registration!";
+    }
+    
+    mysqli_stmt_close($stmtIDA);
+    
+    $queryAAP = "INSERT INTO AssociacaoAlunosProfessores (id_aluno, id_professor)
+    VALUES (?, ?)";
+    $stmtAAP = mysqli_prepare($conn, $queryAAP);
+    mysqli_stmt_bind_param($stmtAAP, "ii", $idRecemCriadoUsuario['id_usuario'], $idProfessor['id_professor']);
+
+    if (mysqli_stmt_execute($stmtAAP)) {
+    // Successfully inserted
+    } else {
+    // Handle the error
+    echo "Error: " . mysqli_error($conn);
+}
 }
 ?>
 
