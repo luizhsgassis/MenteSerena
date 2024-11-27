@@ -12,6 +12,7 @@ if (!isset($_SESSION['id_usuario'])) {
 
 // Obtém o ID do paciente da URL
 $idPaciente = isset($_GET['id']) ? $_GET['id'] : '';
+$nivelAcesso = $_SESSION['UsuarioNivel'];
 
 $erro_acesso = '';
 $sucesso_acesso = '';
@@ -59,21 +60,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
 }
 
 // Consulta para obter as sessões do prontuário
-if ($nivelAcesso == 'aluno') {
-  $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
-                   FROM Sessoes s 
-                   LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
-                   WHERE s.id_prontuario = ? AND s.id_usuario = ?";
-  $stmtSessoes = mysqli_prepare($conn, $querySessoes);
-  mysqli_stmt_bind_param($stmtSessoes, "ii", $prontuario['id_prontuario'], $idUsuarioLogado);
-} else {
-  $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
-                   FROM Sessoes s 
-                   LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
-                   WHERE s.id_prontuario = ?";
-  $stmtSessoes = mysqli_prepare($conn, $querySessoes);
-  mysqli_stmt_bind_param($stmtSessoes, "i", $prontuario['id_prontuario']);
-}
+$idUsuarioLogado = $_SESSION['id_usuario'];
+$querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
+         FROM Sessoes s 
+         LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
+         WHERE s.id_paciente = ? AND s.id_usuario = ?";
+$stmtSessoes = mysqli_prepare($conn, $querySessoes);
+mysqli_stmt_bind_param($stmtSessoes, "ii", $paciente['id_paciente'], $idUsuarioLogado);
 mysqli_stmt_execute($stmtSessoes);
 $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
 // Initialize button variables
@@ -398,7 +391,7 @@ if (!$exists) {
               <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
               <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
               <a href="mainContent.php?tipo=pacientes" class="botao_azul text_button">Voltar</a>
-              <a href="acessarProntuario.php?paciente_id=<?php echo $idPaciente; ?>" class="botao_azul text_button">Ver Prontuário</a>
+              <a href="<?php echo $linkBotao ?>" class="botao_azul text_button"><?php echo $textoBotao; ?></a>
             </div>
           </form>
         </div>
@@ -434,17 +427,7 @@ if (!$exists) {
               </tbody>
             </table>
           </div>
-<<<<<<< HEAD
         </div>
-=======
-          <div class="form_group full_width">
-            <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
-            <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
-            <a href="mainContent.php?tipo=pacientes" class="botao_azul text_button">Voltar</a>
-            <a href="<?php echo $linkBotao ?>" class="botao_azul text_button"><?php echo $textoBotao; ?></a>
-          </div>
-        </form>
->>>>>>> 80984bfe6fc75afeb0ad59e0da3721d5cfbef535
       </div>
     </main>
   </div>
