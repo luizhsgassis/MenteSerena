@@ -57,6 +57,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     }
     mysqli_stmt_close($stmtUpdate);
 }
+
+// Initialize button variables
+$textoBotao = "Default Text"; // Default text
+$paginaBotao = "default_page.php";
+$linkBotao = "empty";
+
+// Consulta para obter as informações do paciente
+$queryExists = "SELECT id_prontuario FROM Prontuarios WHERE id_paciente = ?";
+$stmtExists = mysqli_prepare($conn, $queryExists);
+mysqli_stmt_bind_param($stmtExists, "i", $idPaciente);
+mysqli_stmt_execute($stmtExists);
+$resultExists = mysqli_stmt_get_result($stmtExists);
+$exists = mysqli_fetch_assoc($resultExists);
+mysqli_stmt_close($stmtExists);
+
+if (!$exists) {
+  $textoBotao = "Cadastrar Prontuário";
+  $paginaBotao = "cadastrarProntuario.php?paciente_id=";
+  $linkBotao = $paginaBotao . $idPaciente;
+} else {
+  $textoBotao = "Acessar Prontuário";
+  $paginaBotao = "acessarProntuario.php?paciente_id=";
+  $linkBotao = $paginaBotao . $idPaciente;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -354,7 +379,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
             <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
             <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
             <a href="mainContent.php?tipo=pacientes" class="botao_azul text_button">Voltar</a>
-            <a href="acessarProntuario.php?paciente_id=<?php echo $idPaciente; ?>" class="botao_azul text_button">Ver Prontuário</a>
+            <a href="<?php echo $linkBotao ?>" class="botao_azul text_button"><?php echo $textoBotao; ?></a>
           </div>
         </form>
       </div>

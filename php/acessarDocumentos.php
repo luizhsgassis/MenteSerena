@@ -116,6 +116,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao'])) {
         <form class="main_form" action="acessarDocumentos.php?id=<?php echo $idDocumento; ?>" method="post">
           <div class="form_group">
             <div class="form_input">
+              <label for="data_upload">Nome do Arquivo:</label>
+              <input type="text" name="data_upload" id="data_upload" value="<?php echo explode('.', $documento['nome_original'])[0]; ?>" disabled>
+            </div>
+            <div class="form_input">
+              <label for="data_upload">ID do Arquivo:</label>
+              <input type="text" name="data_upload" id="data_upload" value="<?php echo $documento['id_arquivo']; ?>" disabled>
+            </div>
+            <div class="form_input">
               <label for="tipo_documento">Tipo de Documento:</label>
               <input type="text" name="tipo_documento" id="tipo_documento" value="<?php echo $documento['tipo_documento']; ?>" disabled>
             </div>

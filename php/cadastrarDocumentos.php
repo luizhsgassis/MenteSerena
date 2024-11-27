@@ -34,16 +34,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $extensao = strtolower(pathinfo($arquivoNome, PATHINFO_EXTENSION));
             $tiposPermitidos = [
                 'pdf' => 'application/pdf',
-                'jpeg' => 'image/jpeg',
-                'jpg' => 'image/jpeg',
-                'png' => 'image/png',
                 'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                 'txt' => 'text/plain',
                 'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             ];
 
             if (!array_key_exists($extensao, $tiposPermitidos) || $arquivoTipo !== $tiposPermitidos[$extensao]) {
-                $erro_cadastro = "O tipo de arquivo não é permitido. Formatos aceitos: PDF, JPG, PNG, DOCX, TEXT, EXCEL";
+                $erro_cadastro = "O tipo de arquivo não é permitido. Formatos aceitos: PDF, DOCX, TXT, EXCEL";
             } else {
                 $tipoDocumentoDetectado = strtoupper($extensao);
 

@@ -200,13 +200,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         </form>
         <div class="file_list">
          <h3>Arquivos Anexados</h3>
+         <br>
          <ul>
             <?php while ($arquivo = mysqli_fetch_assoc($resultArquivos)): ?>
               <li>
-                <a href="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>" target="_blank">
+                <a href="baixarArquivo.php?id=<?php echo $arquivo['id_arquivo']; ?>" class="botao_azul text_button" target="_blank" style="text-decoration:none;">
                   <?php echo $arquivo['nome_original']; ?> 
                   (<?php echo date("d/m/Y", strtotime($arquivo['data_upload'])); ?>)
                 </a>
+                <a href="acessarDocumentos.php?id=<?php echo $arquivo['id_arquivo']; ?>" 
+                class="botao_azul text_button" style="margin-left: 10px; text-decoration:none;">
+                Acessar Arquivo
+                </a>
+                <br>
+                <br>
+                <br>
+                <br>
               </li>
             <?php endwhile; ?>
           </ul>
