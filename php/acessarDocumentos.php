@@ -13,6 +13,14 @@ if (!isset($_SESSION['id_usuario'])) {
 // Obtém o ID do documento da URL
 $idDocumento = isset($_GET['id']) ? $_GET['id'] : '';
 
+$querySessao = "SELECT id_sessao FROM ArquivosDigitalizados WHERE id_arquivo = ?";
+$stmtSessao = mysqli_prepare($conn, $querySessao);
+mysqli_stmt_bind_param($stmtSessao, "i", $idDocumento);
+mysqli_stmt_execute($stmtSessao);
+$resultSessao = mysqli_stmt_get_result($stmtSessao);
+$idSessao = mysqli_fetch_assoc($resultSessao);
+mysqli_stmt_close($stmtSessao);
+
 $erro_acesso = '';
 $sucesso_acesso = '';
 
@@ -29,7 +37,6 @@ if (!$documento) {
     $erro_acesso = "Documento não encontrado.";
 }
 
-// Lógica para deletar o documento
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao'])) {
     if ($_POST['botao'] == 'Deletar') {
         $queryDelete = "DELETE FROM ArquivosDigitalizados WHERE id_arquivo = ?";
@@ -83,37 +90,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao'])) {
   <link rel="stylesheet" href="../css/mainContent.css">
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const alterarBtn = document.getElementById('alterarBtn');
-        const concluidoBtn = document.getElementById('concluidoBtn');
-        const formInputs = document.querySelectorAll('.main_form input');
+    const habilitarBtn = document.getElementById('habilitarBtn');
+    const deletarBtn = document.getElementById('deletarBtn'); // Corrected ID
+    const formInputs = document.querySelectorAll('.main_form input');
 
-        alterarBtn.addEventListener('click', function() {
-            formInputs.forEach(input => input.disabled = false);
-            alterarBtn.disabled = true;
-            concluidoBtn.disabled = false;
-        });
-
-        // Validação da data de upload
-        document.getElementById('data_upload').addEventListener('blur', function() {
-            var dataUpload = this.value;
-            var dataUploadError = document.getElementById('dataUploadError');
-            if (! isValidDate(dataUpload)) {
-                dataUploadError.textContent = 'Por favor, preencha uma data de upload válida.';
-            } else {
-                dataUploadError.textContent = '';
-            }
-        });
-
-        // Função para validar a data
-        function isValidDate(dateString) {
-            var regEx = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateString.match(regEx)) return false;  // Formato inválido
-            var d = new Date(dateString);
-            var dNum = d.getTime();
-            if (!dNum && dNum !== 0) return false; // Data inválida
-            return d.toISOString().slice(0, 10) === dateString;
-        }
+    habilitarBtn.addEventListener('click', function() {
+        habilitarBtn.disabled = true;
+        deletarBtn.disabled = false; // This will now correctly enable the button
     });
+  });
   </script>
 </head>
 <body>
@@ -141,10 +126,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao'])) {
             </div>
           </div>
           <div class="form_group full_width">
-            <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
-            <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
-            <button type="submit" class="botao_azul text_button" name="botao" value="Deletar">Deletar</button>
+            <a href="baixarArquivo.php?id=<?php echo $idDocumento; ?>" class="botao_azul text_button" target="_blank">Baixar</a>
+            <?php if (!empty($idSessao)): ?>
+            <a href="acessarSessoes.php?id=<?php echo $idSessao['id_sessao']; ?>" class="botao_azul text_button">Acessar Sessão</a>
+            <?php else: ?>
+            <span class="error">Sessão não encontrada.</span>
+            <?php endif; ?>
             <a href="mainContent.php?tipo=documentos" class="botao_azul text_button">Voltar</a>
+            <br>
+            <br>
+            <br>
+            <button type="submit" id="habilitarBtn" class="botao_azul text_button" name="botao" value="Habilitar Deleção">Habilitar Deleção</button>
+            <button type="submit" id="deletarBtn" class="botao_azul text_button" name="botao" value="Deletar" disabled>Deletar</button>
           </div>
         </form>
       </div>
