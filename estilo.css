@@ -123,7 +123,7 @@ section {
     background-color: var(--white);
 }
 
-.content {
+.conteudo {
     display: flex;
     flex-direction: row;
     height: 100%;

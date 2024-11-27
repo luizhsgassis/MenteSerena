@@ -313,7 +313,7 @@ if (!$exists) {
     <?php include('sidebar.php'); ?>
     <main>
       <div class="main_title"><h2>Informações do Paciente</h2></div>
-      <div class="content">
+      <div class="conteudo">
         <?php if (!empty($erro_acesso)): ?>
           <div class="error"><?php echo $erro_acesso; ?></div>
         <?php elseif (!empty($sucesso_acesso)): ?>
