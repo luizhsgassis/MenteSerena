@@ -46,16 +46,37 @@ switch ($tipo) {
             header("Location: /MenteSerena-master/php/logout.php");
             exit;
         }
-        $query = "SELECT * FROM Usuarios WHERE tipo_usuario = 'aluno'";
+        $query = "SELECT Usuarios.id_usuario, Usuarios.nome, Usuarios.data_nascimento, Usuarios.data_contratacao, Usuarios.telefone, Professores.id_professor 
+                    FROM AssociacaoAlunosProfessores
+                    JOIN Usuarios ON AssociacaoAlunosProfessores.id_aluno = Usuarios.id_usuario
+                    JOIN Professores ON AssociacaoAlunosProfessores.id_professor = Professores.id_professor
+                    WHERE AssociacaoAlunosProfessores.id_professor = (
+                    SELECT id_professor 
+                    FROM Professores 
+                    WHERE id_usuario = $idUsuarioLogado)";
+    
+        // Prepare the query
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        // Check if the result is not empty
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                // Process each row (e.g., display the data)
+            }
+        } else {
+            echo "Nenhum aluno encontrado para este professor.";
+        }
+        
+        mysqli_stmt_close($stmt);
         $titulo = "Alunos";
-        $colunas = ['ID', 'CPF', 'Nome', 'Data de Nascimento', 'Gênero', 'Email', 'Telefone'];
+        $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone'];
         $mapeamento = [
             'ID' => 'id_usuario',
-            'CPF' => 'cpf',
             'Nome' => 'nome',
             'Data de Nascimento' => 'data_nascimento',
-            'Gênero' => 'genero',
-            'Email' => 'email',
+            'Data de Contratação' => 'data_contratacao',
             'Telefone' => 'telefone'
         ];
         $detalheUrl = 'acessarAlunos.php';
