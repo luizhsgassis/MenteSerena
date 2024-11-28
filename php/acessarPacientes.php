@@ -391,7 +391,13 @@ if (!$exists) {
               <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
               <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
               <a href="mainContent.php?tipo=pacientes" class="botao_azul text_button">Voltar</a>
+              <br>
+              <br>
+              <br>
               <a href="<?php echo $linkBotao ?>" class="botao_azul text_button"><?php echo $textoBotao; ?></a>
+              <br>
+              <br>
+              <br>
             </div>
           </form>
         </div>
