@@ -12,6 +12,7 @@ if (!isset($_SESSION['id_usuario'])) {
 
 // Obtém o ID do aluno da URL
 $idAluno = isset($_GET['id']) ? $_GET['id'] : '';
+$autorizacao = $_SESSION['UsuarioNivel'];
 
 $erro_acesso = '';
 $sucesso_acesso = '';
@@ -28,6 +29,7 @@ mysqli_stmt_close($stmtAluno);
 if (!$aluno) {
     $erro_acesso = "Aluno não encontrado.";
 }
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Concluído') {
     $cpf = trim($_POST["cpf"]);
@@ -308,9 +310,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
             </div>
           </div>
           <div class="form_group full_width">
-            <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
-            <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
-            <button type="submit" id="restaurarLoginBtn" class="botao_azul text_button" name="botao" value="Restaurar Login e Senha" disabled>Restaurar Login e Senha</button>
+            <?php if ($autorizacao == 'administrador'): ?>
+              <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
+              <button type="submit" id="concluidoBtn" class="botao_azul text_button" name="botao" value="Concluído" disabled>Concluído</button>
+              <button type="submit" id="restaurarLoginBtn" class="botao_azul text_button" name="botao" value="Restaurar Login e Senha" disabled>Restaurar Login e Senha</button>
+              <?php endif; ?>
             <a href="mainContent.php?tipo=alunos" class="botao_azul text_button">Voltar</a>
           </div>
         </form>
