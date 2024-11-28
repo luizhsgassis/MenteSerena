@@ -63,10 +63,7 @@ switch ($tipo) {
             // Check if the result is not empty
             if (mysqli_num_rows($result) > 0) {
                 while ($row = mysqli_fetch_assoc($result)) {
-                    // Process each row (e.g., display the data)
                 }
-            } else {
-                echo "Nenhum aluno encontrado para este professor.";
             }
             
             mysqli_stmt_close($stmt);
@@ -180,7 +177,17 @@ switch ($tipo) {
                         FROM Pacientes p
                         INNER JOIN AssociacaoPacientesAlunos apa ON p.id_paciente = apa.id_paciente
                         WHERE apa.id_aluno = $idUsuarioLogado";
-        } else {
+        } elseif ($nivelAcesso == 'professor') {
+            $query = "SELECT Pacientes.id_paciente, Pacientes.cpf, Pacientes.nome, Pacientes.data_nascimento, Pacientes.genero, Pacientes.email, Pacientes.telefone
+                        FROM AssociacaoAlunosProfessores
+                        JOIN Usuarios ON AssociacaoAlunosProfessores.id_aluno = Usuarios.id_usuario
+                        JOIN AssociacaoPacientesAlunos ON AssociacaoAlunosProfessores.id_aluno = AssociacaoPacientesAlunos.id_aluno
+                        JOIN Pacientes ON AssociacaoPacientesAlunos.id_paciente = Pacientes.id_paciente
+                        WHERE AssociacaoAlunosProfessores.id_professor = (
+                            SELECT id_professor 
+                            FROM Professores 
+                            WHERE id_usuario = $idUsuarioLogado)";
+        } else{
             $query = "SELECT * FROM Pacientes";
         }
         $titulo = "Pacientes";
