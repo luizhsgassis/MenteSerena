@@ -94,6 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
       const alterarBtn = document.getElementById('alterarBtn');
       const concluidoBtn = document.getElementById('concluidoBtn');
       const formInputs = document.querySelectorAll('.main_form input, .main_form select');
+      const formSelect = document.querySelectorAll('.main_form select');
       const form = document.querySelector('.main_form');
 
       alterarBtn.addEventListener('click', function() {
@@ -216,7 +217,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
           }
 
           if (hasError) {
-              event.preventDefault(); // Impede o envio do formulário
+              event.preventDefault();
+              const firstErrorElement = document.querySelector('.error:not(:empty)');
+              if (firstErrorElement) {
+                  firstErrorElement.scrollIntoView({ behavior: 'smooth' });
+              }
           }
       });
 
