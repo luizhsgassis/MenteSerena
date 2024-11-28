@@ -17,8 +17,8 @@ $autorizacao = $_SESSION['UsuarioNivel'];
 $erro_acesso = '';
 $sucesso_acesso = '';
 
-// Consulta para obter as informações do aluno
-$queryAluno = "SELECT * FROM Usuarios WHERE id_usuario = ? AND tipo_usuario = 'aluno'";
+// Adicione o campo 'ativo' na consulta SQL
+$queryAluno = "SELECT *, ativo FROM Usuarios WHERE id_usuario = ? AND tipo_usuario = 'aluno'";
 $stmtAluno = mysqli_prepare($conn, $queryAluno);
 mysqli_stmt_bind_param($stmtAluno, "i", $idAluno);
 mysqli_stmt_execute($stmtAluno);
@@ -43,10 +43,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     $telefone = trim($_POST["telefone"]);
     $login = trim($_POST["login"]);
     $novaSenha = trim($_POST["nova_senha"]);
+    $ativo = ($_POST["ativo"] == 'true') ? 1 : 0;
 
-    $queryUpdate = "UPDATE Usuarios SET cpf = ?, nome = ?, data_nascimento = ?, genero = ?, data_contratacao = ?, formacao = ?, especialidade = ?, email = ?, telefone = ? WHERE id_usuario = ?";
+    $queryUpdate = "UPDATE Usuarios SET cpf = ?, nome = ?, data_nascimento = ?, genero = ?, data_contratacao = ?, formacao = ?, especialidade = ?, email = ?, telefone = ?, ativo = ? WHERE id_usuario = ?";
     $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-    mysqli_stmt_bind_param($stmtUpdate, "sssssssssi", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $idAluno);
+    mysqli_stmt_bind_param($stmtUpdate, "ssssssssssi", $cpf, $nome, $dataNascimento, $genero, $dataContratacao, $formacao, $especialidade, $email, $telefone, $ativo, $idAluno);
 
     if (mysqli_stmt_execute($stmtUpdate)) {
         $sucesso_acesso = "Dados do aluno atualizados com sucesso!";
@@ -307,6 +308,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
               <label for="telefone">Telefone:*</label>
               <input type="text" name="telefone" id="telefone" value="<?php echo $aluno['telefone']; ?>" disabled>
               <span id="telefoneError" class="error"></span>
+            </div>
+            <div class="form_input">
+              <label for="ativo">Ativo:</label>
+              <select name="ativo" id="ativo" disabled>
+                <option value="true" <?php echo ($aluno['ativo'] == 1) ? 'selected' : ''; ?>>Sim</option>
+                <option value="false" <?php echo ($aluno['ativo'] == 0) ? 'selected' : ''; ?>>Não</option>
+              </select>
             </div>
           </div>
           <div class="form_group full_width">
