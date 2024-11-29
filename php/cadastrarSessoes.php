@@ -17,6 +17,19 @@ $sucesso_cadastro = '';
 $idAlunoLogado = $_SESSION['id_usuario'];
 $nomeAlunoLogado = $_SESSION['nome_usuario'];
 
+// Consulta para obter o nome do professor associado ao aluno logado
+$queryProfessor = "SELECT u.nome, p.id_professor 
+FROM AssociacaoAlunosProfessores aap
+JOIN Professores p ON aap.id_professor = p.id_professor
+JOIN Usuarios u ON p.id_usuario = u.id_usuario
+WHERE aap.id_aluno = ?";
+$stmtProfessor = mysqli_prepare($conn, $queryProfessor);
+mysqli_stmt_bind_param($stmtProfessor, "i", $idAlunoLogado);
+mysqli_stmt_execute($stmtProfessor);
+mysqli_stmt_bind_result($stmtProfessor, $nomeProfessor, $idProfessor);
+mysqli_stmt_fetch($stmtProfessor);
+mysqli_stmt_close($stmtProfessor);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $idPaciente = $_POST["paciente"];
     $idAluno = $_POST["usuario_aluno"];
@@ -36,19 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     mysqli_stmt_fetch($stmtProntuario);
     mysqli_stmt_close($stmtProntuario);
 
-    // Consulta para obter o ID do professor com base no ID do usuário
-    $queryProfessor = "SELECT id_professor FROM Professores WHERE id_usuario = ?";
-    $stmtProfessor = mysqli_prepare($conn, $queryProfessor);
-    mysqli_stmt_bind_param($stmtProfessor, "i", $idProfessor);
-    mysqli_stmt_execute($stmtProfessor);
-    mysqli_stmt_bind_result($stmtProfessor, $idProfessorReal);
-    mysqli_stmt_fetch($stmtProfessor);
-    mysqli_stmt_close($stmtProfessor);
-
     // Inserir dados na tabela Sessoes
     $querySessao = "INSERT INTO Sessoes (id_prontuario, id_paciente, id_usuario, id_professor, data, registro_sessao, anotacoes, rascunho) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmtSessao = mysqli_prepare($conn, $querySessao);
-    mysqli_stmt_bind_param($stmtSessao, "iiiisssi", $idProntuario, $idPaciente, $idAluno, $idProfessorReal, $data, $registroSessao, $anotacoes, $rascunho);
+    mysqli_stmt_bind_param($stmtSessao, "iiiisssi", $idProntuario, $idPaciente, $idAluno, $idProfessor, $data, $registroSessao, $anotacoes, $rascunho);
 
     if (mysqli_stmt_execute($stmtSessao)) {
         $idSessao = mysqli_insert_id($conn);
@@ -253,14 +257,8 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                         </div>
                         <div class="form_input">
                             <label for="usuario_professor">Professor:</label>
-                            <select name="usuario_professor" id="usuario_professor" required>
-                                <option value="">Selecione um professor</option>
-                                <?php
-                                while ($row = mysqli_fetch_assoc($resultProfessores)) {
-                                    echo '<option value="' . $row['id_usuario'] . '">' . $row['nome'] . '</option>';
-                                }
-                                ?>
-                            </select>
+                            <input type="text" name="usuario_professor_nome" id="usuario_professor_nome" value="<?php echo $nomeProfessor; ?>" disabled>
+                            <input type="hidden" name="usuario_professor" id="usuario_professor" value="<?php echo $idProfessor; ?>" required>
                         </div>
                         <div class="form_input">
                             <label for="data">Data:</label>

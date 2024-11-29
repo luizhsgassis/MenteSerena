@@ -101,26 +101,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
         echo "Nenhuma linha encontrada.";
     }
 }
-
-// Consulta para obter as sessões do prontuário
-if ($nivelAcesso == 'aluno') {
-    $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
-                     FROM Sessoes s 
-                     LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
-                     WHERE s.id_prontuario = ? AND s.id_usuario = ?";
-    $stmtSessoes = mysqli_prepare($conn, $querySessoes);
-    mysqli_stmt_bind_param($stmtSessoes, "ii", $prontuario['id_prontuario'], $idUsuarioLogado);
-} else {
-    $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
-                     FROM Sessoes s 
-                     LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
-                     WHERE s.id_prontuario = ?";
-    $stmtSessoes = mysqli_prepare($conn, $querySessoes);
-    mysqli_stmt_bind_param($stmtSessoes, "i", $prontuario['id_prontuario']);
-}
-mysqli_stmt_execute($stmtSessoes);
-$resultSessoes = mysqli_stmt_get_result($stmtSessoes);
-
 ?>
 
 <!DOCTYPE html>
@@ -215,38 +195,6 @@ $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
             <a href="acessarPacientes.php?id=<?php echo $idPaciente; ?>" class="botao_azul text_button">Voltar</a>
           </div>
         </form>
-        <h3>Sessões</h3>
-        <div class="table-container">
-          
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Data</th>
-                <th>Registro da Sessão</th>
-                <th>Anotações</th>
-                <th>Usuário</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php if (mysqli_num_rows($resultSessoes) > 0): ?>
-                <?php while ($sessao = mysqli_fetch_assoc($resultSessoes)): ?>
-                  <tr onclick="window.location.href='acessarSessoes.php?id=<?php echo $sessao['id_sessao']; ?>'">
-                    <td><?php echo $sessao['id_sessao']; ?></td>
-                    <td><?php echo date('d/m/Y', strtotime($sessao['data'])); ?></td>
-                    <td><?php echo $sessao['registro_sessao']; ?></td>
-                    <td><?php echo $sessao['anotacoes']; ?></td>
-                    <td><?php echo $sessao['nome_usuario']; ?></td>
-                  </tr>
-                <?php endwhile; ?>
-              <?php else: ?>
-                <tr>
-                  <td colspan="5">Nenhuma sessão encontrada</td>
-                </tr>
-              <?php endif; ?>
-            </tbody>
-          </table>
-        </div>
       </div>
     </main>
   </div>
