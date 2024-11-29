@@ -78,6 +78,23 @@ switch ($tipo) {
             ];
             $detalheUrl = 'acessarAlunos.php';
             break;
+        } elseif ($nivelAcesso == 'administrador') {
+            $query = "SELECT Usuarios.id_usuario, Usuarios.nome, Usuarios.data_nascimento, Usuarios.data_contratacao, Usuarios.telefone, Professores.id_professor, (SELECT nome FROM Usuarios WHERE id_usuario = Professores.id_usuario) AS nome_professor
+                FROM AssociacaoAlunosProfessores
+                JOIN Usuarios ON AssociacaoAlunosProfessores.id_aluno = Usuarios.id_usuario
+                JOIN Professores ON AssociacaoAlunosProfessores.id_professor = Professores.id_professor";
+            $titulo = "Alunos";
+            $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone', 'Professor'];
+            $mapeamento = [
+            'ID' => 'id_usuario',
+            'Nome' => 'nome',
+            'Data de Nascimento' => 'data_nascimento',
+            'Data de Contratação' => 'data_contratacao',
+            'Telefone' => 'telefone',
+            'Professor' => 'nome_professor'
+            ];
+            $detalheUrl = 'acessarAlunos.php';
+            break;
         } else {
             $query = "SELECT * FROM Usuarios WHERE tipo_usuario = 'aluno'";
             $titulo = "Alunos";
@@ -92,6 +109,24 @@ switch ($tipo) {
             $detalheUrl = 'acessarAlunos.php';
             break;
         }
+    if ($nivelAcesso == 'administrador') {
+        $query = "SELECT Usuarios.id_usuario, Usuarios.nome, Usuarios.data_nascimento, Usuarios.data_contratacao, Usuarios.telefone, Professores.id_professor, (SELECT nome FROM Usuarios WHERE id_usuario = Professores.id_usuario) AS nome_professor
+            FROM AssociacaoAlunosProfessores
+            JOIN Usuarios ON AssociacaoAlunosProfessores.id_aluno = Usuarios.id_usuario
+            JOIN Professores ON AssociacaoAlunosProfessores.id_professor = Professores.id_professor";
+        $titulo = "Alunos";
+        $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone', 'Professor'];
+        $mapeamento = [
+        'ID' => 'id_usuario',
+        'Nome' => 'nome',
+        'Data de Nascimento' => 'data_nascimento',
+        'Data de Contratação' => 'data_contratacao',
+        'Telefone' => 'telefone',
+        'Professor' => 'nome_professor'
+        ];
+        $detalheUrl = 'acessarAlunos.php';
+        break;
+    }
     case 'documentos':
         if ($nivelAcesso == 'aluno') {
             $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario 
@@ -131,6 +166,17 @@ switch ($tipo) {
                       LEFT JOIN Pacientes pa ON s.id_paciente = pa.id_paciente
                       LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
                       WHERE s.id_usuario = $idUsuarioLogado";
+        } elseif ($nivelAcesso == 'professor') {
+            $query = "SELECT s.id_sessao, s.id_prontuario, s.id_paciente, s.id_usuario, s.data, s.registro_sessao, s.anotacoes, p.consideracoes_finais, pa.nome AS nome_paciente, u.nome AS nome_usuario 
+                      FROM Sessoes s 
+                      LEFT JOIN Prontuarios p ON s.id_prontuario = p.id_prontuario
+                      LEFT JOIN Pacientes pa ON s.id_paciente = pa.id_paciente
+                      LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
+                      JOIN AssociacaoAlunosProfessores aap ON s.id_usuario = aap.id_aluno
+                      WHERE aap.id_professor = (
+                          SELECT id_professor 
+                          FROM Professores 
+                          WHERE id_usuario = $idUsuarioLogado)";
         } else {
             $query = "SELECT s.id_sessao, s.id_prontuario, s.id_paciente, s.id_usuario, s.data, s.registro_sessao, s.anotacoes, p.consideracoes_finais, pa.nome AS nome_paciente, u.nome AS nome_usuario 
                       FROM Sessoes s 
@@ -142,7 +188,6 @@ switch ($tipo) {
         $colunas = ['ID', 'Paciente', 'Usuário', 'Data', 'Registro da Sessão', 'Anotações'];
         $mapeamento = [
             'ID' => 'id_sessao',
-            
             'Paciente' => 'nome_paciente',
             'Usuário' => 'nome_usuario',
             'Data' => 'data',
@@ -158,6 +203,16 @@ switch ($tipo) {
                       LEFT JOIN Usuarios u ON a.id_usuario = u.id_usuario
                       LEFT JOIN Sessoes s ON a.id_sessao = s.id_sessao
                       WHERE a.id_usuario = $idUsuarioLogado AND a.status = 'pendente' AND s.data <= DATE_SUB(NOW(), INTERVAL 48 HOUR)";
+        } elseif ($nivelAcesso == 'professor') {
+            $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, s.data AS data_sessao, a.status, u.nome AS nome_usuario
+                      FROM Avisos a
+                      LEFT JOIN Usuarios u ON a.id_usuario = u.id_usuario
+                      LEFT JOIN Sessoes s ON a.id_sessao = s.id_sessao
+                      JOIN AssociacaoAlunosProfessores aap ON a.id_usuario = aap.id_aluno
+                      WHERE aap.id_professor = (
+                          SELECT id_professor 
+                          FROM Professores 
+                          WHERE id_usuario = $idUsuarioLogado) AND a.status = 'pendente' AND s.data <= DATE_SUB(NOW(), INTERVAL 48 HOUR)";
         } else {
             $query = "SELECT a.id_aviso, a.id_sessao, a.id_usuario, a.mensagem, s.data AS data_sessao, a.status, u.nome AS nome_usuario
                       FROM Avisos a
@@ -286,12 +341,12 @@ if (!empty($query)) {
                     <?php
                     switch ($tipo) {
                         case 'pacientes':
-                            if ($nivelAcesso != 'administrador') {
+                            if ($nivelAcesso == 'aluno') {
                                 echo '<a href="cadastrarPacientes.php" class="botao_azul text_button">Cadastrar Paciente</a>';
                             }
                             break;
                         case 'alunos':
-                            if ($nivelAcesso != 'administrador') {
+                            if ($nivelAcesso !== 'administrador') {
                                 echo '<a href="cadastrarAlunos.php" class="botao_azul text_button">Cadastrar Aluno</a>';
                             }
                             break;
@@ -299,12 +354,12 @@ if (!empty($query)) {
                             echo '<a href="cadastrarProfessores.php" class="botao_azul text_button">Cadastrar Professor</a>';
                             break;
                         case 'documentos':
-                            if ($nivelAcesso != 'administrador') {
+                            if ($nivelAcesso == 'aluno') {
                                 echo '<a href="cadastrarDocumentos.php" class="botao_azul text_button">Cadastrar Documento</a>';
                             }
                             break;
                         case 'sessoes':
-                            if ($nivelAcesso != 'administrador') {
+                            if ($nivelAcesso == 'aluno') {
                                 echo '<a href="cadastrarSessoes.php" class="botao_azul text_button">Cadastrar Sessão</a>';
                             }
                             break;

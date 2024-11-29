@@ -29,47 +29,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $dataNascimento = trim($_POST["data_nascimento"]);
   $telefone = trim($_POST["telefone"]);
 
-  $loginPlaceholder1 = substr($nome, 0, 3);
-  $loginPlaceholder2 = substr($telefone, -3);
-  $loginTemporario = $loginPlaceholder1 . $loginPlaceholder2;
+  // Verifica se o CPF já existe no banco de dados
+  $queryCheckCPF = "SELECT COUNT(*) AS count FROM Usuarios WHERE cpf = ?";
+  $stmtCheckCPF = mysqli_prepare($conn, $queryCheckCPF);
+  mysqli_stmt_bind_param($stmtCheckCPF, "s", $cpf);
+  mysqli_stmt_execute($stmtCheckCPF);
+  $resultCheckCPF = mysqli_stmt_get_result($stmtCheckCPF);
+  $rowCheckCPF = mysqli_fetch_assoc($resultCheckCPF);
 
-  // Verifica se o login já existe no banco de dados
-  $queryCheckLogin = "SELECT COUNT(*) AS count FROM Usuarios WHERE login = ?";
-  $stmtCheckLogin = mysqli_prepare($conn, $queryCheckLogin);
-  mysqli_stmt_bind_param($stmtCheckLogin, "s", $loginTemporario);
-  mysqli_stmt_execute($stmtCheckLogin);
-  $resultCheckLogin = mysqli_stmt_get_result($stmtCheckLogin);
-  $rowCheckLogin = mysqli_fetch_assoc($resultCheckLogin);
-
-  if ($rowCheckLogin['count'] > 0) {
-    // Se já existe, ajusta o login
-    $loginPlaceholder3 = substr($telefone, 0, 3); 
-    $loginTemporario = $loginTemporario . $loginPlaceholder3;
-  }
-
-  $senhaPlaceholder1 = substr($cpf, 0, 3);
-  $senhaPlaceholder2 = substr($dataNascimento, -2);
-  $senhaTemporaria = $senhaPlaceholder1 . $senhaPlaceholder2;
-  $senhaHash = password_hash($senhaTemporaria, PASSWORD_DEFAULT);
-
-  $genero = 'Outro'; // Valor padrão para gênero
-  $dataContratacao = NULL;
-  $formacao = NULL;
-  $especialidade = NULL;
-  $email = NULL;
-  $dataContratacao = date('Y-m-d');
-
-  $query = "INSERT INTO Usuarios (cpf, nome, data_nascimento, data_contratacao, telefone, login, senha, tipo_usuario, ativo) 
-  VALUES (?, ?, ?, ?, ?, ?, ?, 'aluno', 1)";
-  $stmt = mysqli_prepare($conn, $query);
-  mysqli_stmt_bind_param($stmt, "sssssss", $cpf, $nome, $dataNascimento, $dataContratacao, $telefone, $loginTemporario, $senhaHash);
-  
-  if (mysqli_stmt_execute($stmt)) {
-    $sucesso_cadastro = "Aluno cadastrado com sucesso!";
+  if ($rowCheckCPF['count'] > 0) {
+    $erro_cadastro = "Erro: O CPF já existe no sistema.";
   } else {
-    $erro_cadastro = "Erro ao cadastrar aluno: " . mysqli_error($conn);
-  }
-  mysqli_stmt_close($stmt);
+    $loginPlaceholder1 = substr($nome, 0, 3);
+    $loginPlaceholder2 = substr($telefone, -3);
+    $loginTemporario = $loginPlaceholder1 . $loginPlaceholder2;
+
+    // Verifica se o login já existe no banco de dados
+    $queryCheckLogin = "SELECT COUNT(*) AS count FROM Usuarios WHERE login = ?";
+    $stmtCheckLogin = mysqli_prepare($conn, $queryCheckLogin);
+    mysqli_stmt_bind_param($stmtCheckLogin, "s", $loginTemporario);
+    mysqli_stmt_execute($stmtCheckLogin);
+    $resultCheckLogin = mysqli_stmt_get_result($stmtCheckLogin);
+    $rowCheckLogin = mysqli_fetch_assoc($resultCheckLogin);
+
+    if ($rowCheckLogin['count'] > 0) {
+      // Se já existe, ajusta o login
+      $loginPlaceholder3 = substr($telefone, 0, 3); 
+      $loginTemporario = $loginTemporario . $loginPlaceholder3;
+    }
+
+    $senhaPlaceholder1 = substr($cpf, 0, 3);
+    $senhaPlaceholder2 = substr($dataNascimento, -2);
+    $senhaTemporaria = $senhaPlaceholder1 . $senhaPlaceholder2;
+    $senhaHash = password_hash($senhaTemporaria, PASSWORD_DEFAULT);
+
+    $genero = 'Outro'; // Valor padrão para gênero
+    $dataContratacao = NULL;
+    $formacao = NULL;
+    $especialidade = NULL;
+    $email = NULL;
+    $dataContratacao = date('Y-m-d');
+
+    $query = "INSERT INTO Usuarios (cpf, nome, data_nascimento, data_contratacao, telefone, login, senha, tipo_usuario, ativo) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'aluno', 1)";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "sssssss", $cpf, $nome, $dataNascimento, $dataContratacao, $telefone, $loginTemporario, $senhaHash);
+    
+    if (mysqli_stmt_execute($stmt)) {
+      $sucesso_cadastro = "Aluno cadastrado com sucesso!";
+    } else {
+      $erro_cadastro = "Erro ao cadastrar aluno: " . mysqli_error($conn);
+    }
+    mysqli_stmt_close($stmt);
     $queryIDA = "SELECT id_usuario FROM Usuarios WHERE cpf = ?";
     $stmtIDA = mysqli_prepare($conn, $queryIDA);
     mysqli_stmt_bind_param($stmtIDA, "s", $cpf); // Ensure binding as string if cpf is not an integer
@@ -94,7 +105,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
     // Handle the error
     echo "Error: " . mysqli_error($conn);
-}
+    }
+  }
 }
 ?>
 
