@@ -15,10 +15,14 @@ $sucesso_busca = '';
 $sessoes = [];
 $totalSessoes = 0;
 
+// Obtém o nível de acesso do usuário logado
+$nivelAcesso = $_SESSION['UsuarioNivel'];
+$idUsuarioLogado = $_SESSION['id_usuario'];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $idPaciente = $_POST["paciente"];
     $idAluno = $_POST["aluno"];
-    $idProfessor = $_POST["professor"];
+    $idProfessor = isset($_POST["professor"]) ? $_POST["professor"] : null;
     $dataInicio = $_POST["data_inicio"];
     $dataFim = $_POST["data_fim"];
 
@@ -45,6 +49,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $params[] = $idAluno;
             $types .= "i";
         }
+        if ($nivelAcesso != 'professor' && !empty($idProfessor)) {
+            $query .= " AND s.id_professor = ?";
+            $params[] = $idProfessor;
+            $types .= "i";
+        }
 
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, $types, ...$params);
@@ -62,8 +71,20 @@ $queryPacientes = "SELECT id_paciente, nome FROM Pacientes";
 $resultPacientes = mysqli_query($conn, $queryPacientes);
 
 // Consulta para obter a lista de alunos
-$queryAlunos = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'aluno'";
-$resultAlunos = mysqli_query($conn, $queryAlunos);
+if ($nivelAcesso == 'professor') {
+    $queryAlunos = "SELECT u.id_usuario, u.nome 
+                    FROM AssociacaoAlunosProfessores aap
+                    JOIN Usuarios u ON aap.id_aluno = u.id_usuario
+                    JOIN Professores p ON aap.id_professor = p.id_professor
+                    WHERE p.id_usuario = ?";
+    $stmtAlunos = mysqli_prepare($conn, $queryAlunos);
+    mysqli_stmt_bind_param($stmtAlunos, "i", $idUsuarioLogado);
+    mysqli_stmt_execute($stmtAlunos);
+    $resultAlunos = mysqli_stmt_get_result($stmtAlunos);
+} else {
+    $queryAlunos = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'aluno'";
+    $resultAlunos = mysqli_query($conn, $queryAlunos);
+}
 
 // Consulta para obter a lista de professores
 $queryProfessores = "SELECT id_usuario, nome FROM Usuarios WHERE tipo_usuario = 'professor'";
@@ -116,6 +137,7 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                                 ?>
                             </select>
                         </div>
+                        <?php if ($nivelAcesso != 'professor'): ?>
                         <div class="form_input">
                             <label for="professor">Professor:</label>
                             <select name="professor" id="professor">
@@ -127,6 +149,7 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                                 ?>
                             </select>
                         </div>
+                        <?php endif; ?>
                         <div class="form_input">
                             <label for="data_inicio">Data Início:</label>
                             <input type="date" name="data_inicio" id="data_inicio" required>

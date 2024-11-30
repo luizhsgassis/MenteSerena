@@ -53,20 +53,7 @@ switch ($tipo) {
                         WHERE AssociacaoAlunosProfessores.id_professor = (
                         SELECT id_professor 
                         FROM Professores 
-                        WHERE id_usuario = $idUsuarioLogado)";
-        
-            // Prepare the query
-            $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
-            
-            // Check if the result is not empty
-            if (mysqli_num_rows($result) > 0) {
-                while ($row = mysqli_fetch_assoc($result)) {
-                }
-            }
-            
-            mysqli_stmt_close($stmt);
+                        WHERE id_usuario = $idUsuarioLogado) AND Usuarios.ativo = 1";
             $titulo = "Alunos";
             $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone'];
             $mapeamento = [
@@ -79,54 +66,24 @@ switch ($tipo) {
             $detalheUrl = 'acessarAlunos.php';
             break;
         } elseif ($nivelAcesso == 'administrador') {
-            $query = "SELECT Usuarios.id_usuario, Usuarios.nome, Usuarios.data_nascimento, Usuarios.data_contratacao, Usuarios.telefone, Professores.id_professor, (SELECT nome FROM Usuarios WHERE id_usuario = Professores.id_usuario) AS nome_professor
+            $query = "SELECT Usuarios.id_usuario, Usuarios.nome, Usuarios.data_nascimento, Usuarios.data_contratacao, Usuarios.telefone, Usuarios.ativo, Professores.id_professor, (SELECT nome FROM Usuarios WHERE id_usuario = Professores.id_usuario) AS nome_professor
                 FROM AssociacaoAlunosProfessores
                 JOIN Usuarios ON AssociacaoAlunosProfessores.id_aluno = Usuarios.id_usuario
                 JOIN Professores ON AssociacaoAlunosProfessores.id_professor = Professores.id_professor";
             $titulo = "Alunos";
-            $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone', 'Professor'];
-            $mapeamento = [
-            'ID' => 'id_usuario',
-            'Nome' => 'nome',
-            'Data de Nascimento' => 'data_nascimento',
-            'Data de Contratação' => 'data_contratacao',
-            'Telefone' => 'telefone',
-            'Professor' => 'nome_professor'
-            ];
-            $detalheUrl = 'acessarAlunos.php';
-            break;
-        } else {
-            $query = "SELECT * FROM Usuarios WHERE tipo_usuario = 'aluno'";
-            $titulo = "Alunos";
-            $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone'];
+            $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone', 'Ativo', 'Professor'];
             $mapeamento = [
                 'ID' => 'id_usuario',
                 'Nome' => 'nome',
                 'Data de Nascimento' => 'data_nascimento',
                 'Data de Contratação' => 'data_contratacao',
-                'Telefone' => 'telefone'
+                'Telefone' => 'telefone',
+                'Ativo' => 'ativo',
+                'Professor' => 'nome_professor'
             ];
             $detalheUrl = 'acessarAlunos.php';
             break;
         }
-    if ($nivelAcesso == 'administrador') {
-        $query = "SELECT Usuarios.id_usuario, Usuarios.nome, Usuarios.data_nascimento, Usuarios.data_contratacao, Usuarios.telefone, Professores.id_professor, (SELECT nome FROM Usuarios WHERE id_usuario = Professores.id_usuario) AS nome_professor
-            FROM AssociacaoAlunosProfessores
-            JOIN Usuarios ON AssociacaoAlunosProfessores.id_aluno = Usuarios.id_usuario
-            JOIN Professores ON AssociacaoAlunosProfessores.id_professor = Professores.id_professor";
-        $titulo = "Alunos";
-        $colunas = ['ID', 'Nome', 'Data de Nascimento', 'Data de Contratação', 'Telefone', 'Professor'];
-        $mapeamento = [
-        'ID' => 'id_usuario',
-        'Nome' => 'nome',
-        'Data de Nascimento' => 'data_nascimento',
-        'Data de Contratação' => 'data_contratacao',
-        'Telefone' => 'telefone',
-        'Professor' => 'nome_professor'
-        ];
-        $detalheUrl = 'acessarAlunos.php';
-        break;
-    }
     case 'documentos':
         if ($nivelAcesso == 'aluno') {
             $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario 
@@ -306,33 +263,35 @@ if (!empty($query)) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            if (mysqli_num_rows($result) > 0) {
-                                while ($row = mysqli_fetch_assoc($result)) {
-                                    $rowUrl = ($tipo == 'notificacoes') ? "acessarSessoes.php?id=" . $row['id_sessao'] : "$detalheUrl?id=" . $row[$mapeamento['ID']];
-                                    echo "<tr onclick=\"window.location.href='$rowUrl'\">";
-                                    foreach ($colunas as $coluna) {
-                                        $campo = $mapeamento[$coluna];
-                                        if ($coluna == 'Data de Nascimento' && isset($row[$campo])) {
-                                            $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
-                                            echo "<td>$dataFormatada</td>";
-                                        } elseif ($coluna == 'Data da Sessão' && isset($row[$campo])) {
-                                            $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
-                                            echo "<td>$dataFormatada</td>";
-                                        } elseif ($coluna == 'Data' && isset($row[$campo])) {
-                                            $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
-                                            echo "<td>$dataFormatada</td>";
-                                        } else {
-                                            echo "<td>" . (isset($row[$campo]) ? $row[$campo] : '') . "</td>";
-                                        }
-                                    }
-                                    echo "</tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='" . count($colunas) . "'>Nenhum registro encontrado</td></tr>";
-                            }
-                            ?>
-                        </tbody>
+    <?php
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $rowUrl = ($tipo == 'notificacoes') ? "acessarSessoes.php?id=" . $row['id_sessao'] : "$detalheUrl?id=" . $row[$mapeamento['ID']];
+            echo "<tr onclick=\"window.location.href='$rowUrl'\">";
+            foreach ($colunas as $coluna) {
+                $campo = $mapeamento[$coluna];
+                if ($coluna == 'Data de Nascimento' && isset($row[$campo])) {
+                    $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
+                    echo "<td>$dataFormatada</td>";
+                } elseif ($coluna == 'Data da Sessão' && isset($row[$campo])) {
+                    $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
+                    echo "<td>$dataFormatada</td>";
+                } elseif ($coluna == 'Data' && isset($row[$campo])) {
+                    $dataFormatada = date('d/m/Y', strtotime($row[$campo]));
+                    echo "<td>$dataFormatada</td>";
+                } elseif ($coluna == 'Ativo') {
+                    echo "<td>" . ($row[$campo] ? 'Sim' : 'Não') . "</td>";
+                } else {
+                    echo "<td>" . (isset($row[$campo]) ? $row[$campo] : '') . "</td>";
+                }
+            }
+            echo "</tr>";
+        }
+    } else {
+        echo "<tr><td colspan='" . count($colunas) . "'>Nenhum registro encontrado</td></tr>";
+    }
+    ?>
+</tbody>
                     </table>
                 </div>
                 <!-- Botão para cadastrar novo registro -->
