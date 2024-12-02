@@ -74,16 +74,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     mysqli_stmt_close($stmtUpdate);
 }
 
-// Consulta para obter as sessões do prontuário
 $idUsuarioLogado = $_SESSION['id_usuario'];
-$querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
-         FROM Sessoes s 
-         LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
-         WHERE s.id_paciente = ? AND s.id_usuario = ?";
-$stmtSessoes = mysqli_prepare($conn, $querySessoes);
-mysqli_stmt_bind_param($stmtSessoes, "ii", $paciente['id_paciente'], $idUsuarioLogado);
-mysqli_stmt_execute($stmtSessoes);
-$resultSessoes = mysqli_stmt_get_result($stmtSessoes);
+
+if ($nivelAcesso == 'aluno'){
+  $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
+          FROM Sessoes s 
+          LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
+          WHERE s.id_paciente = ? AND s.id_usuario = ?";
+  $stmtSessoes = mysqli_prepare($conn, $querySessoes);
+  mysqli_stmt_bind_param($stmtSessoes, "ii", $paciente['id_paciente'], $idUsuarioLogado);
+  mysqli_stmt_execute($stmtSessoes);
+  $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
+} elseif ($nivelAcesso == 'professor'){
+  $queryIdProfessorLogado = "SELECT id_professor FROM Professores WHERE id_usuario = $idUsuarioLogado";
+  $IdProfessorLogado = mysqli_query($conn, $queryIdProfessorLogado);
+  $row = mysqli_fetch_assoc($IdProfessorLogado);
+  $idProfessorLogado = $row['id_professor'];
+
+  $querySessoes = "SELECT S.id_sessao, S.data, S.registro_sessao, S.anotacoes, U.nome AS nome_usuario
+                    FROM Sessoes S
+                    JOIN Usuarios U ON S.id_usuario = U.id_usuario
+                    WHERE S.id_paciente = ? AND S.id_professor = ?";
+  $stmtSessoes = mysqli_prepare($conn, $querySessoes);
+  mysqli_stmt_bind_param($stmtSessoes, "ii", $paciente['id_paciente'], $idProfessorLogado);
+  mysqli_stmt_execute($stmtSessoes);
+  $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
+}
 // Initialize button variables
 $textoBotao = "Default Text"; // Default text
 $paginaBotao = "default_page.php";
