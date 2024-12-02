@@ -13,6 +13,7 @@ if (!isset($_SESSION['id_usuario'])) {
 // Obtém o ID do paciente da URL
 $idPaciente = isset($_GET['id']) ? $_GET['id'] : '';
 $nivelAcesso = $_SESSION['UsuarioNivel'];
+$idUsuarioLogado = $_SESSION['id_usuario'];
 
 $erro_acesso = '';
 $sucesso_acesso = '';
@@ -25,6 +26,20 @@ mysqli_stmt_execute($stmtPaciente);
 $resultPaciente = mysqli_stmt_get_result($stmtPaciente);
 $paciente = mysqli_fetch_assoc($resultPaciente);
 mysqli_stmt_close($stmtPaciente);
+
+// Consulta para obter o aluno responsável por um paciente
+$queryAlunoResp = "SELECT u.id_usuario, u.nome
+                  FROM Usuarios u
+                  JOIN AssociacaoPacientesAlunos apa
+                  ON u.id_usuario = apa.id_aluno
+                  WHERE apa.id_paciente = $idPaciente";
+$stmtAlunoResp = mysqli_prepare($conn, $queryAlunoResp);
+mysqli_stmt_execute($stmtAlunoResp);
+$resultAlunoResp = mysqli_stmt_get_result($stmtAlunoResp);
+$alunoResp = mysqli_fetch_assoc($resultAlunoResp);
+$alunoRespNome = $alunoResp ['nome'];
+$alunoRespID = $alunoResp ['id_usuario'];
+mysqli_stmt_close($stmtAlunoResp);
 
 if (!$paciente) {
     $erro_acesso = "Paciente não encontrado.";
@@ -93,6 +108,33 @@ if (!$exists) {
   $linkBotao = $paginaBotao . $idPaciente;
 }
 
+$queryAlunoProf = "SELECT Usuarios.id_usuario, Usuarios.nome 
+            FROM AssociacaoAlunosProfessores
+            JOIN Usuarios ON AssociacaoAlunosProfessores.id_aluno = Usuarios.id_usuario
+            JOIN Professores ON AssociacaoAlunosProfessores.id_professor = Professores.id_professor
+            WHERE AssociacaoAlunosProfessores.id_professor = (
+            SELECT id_professor 
+            FROM Professores 
+            WHERE id_usuario = $idUsuarioLogado) AND Usuarios.ativo = 1";
+
+$resultAlunoProf = mysqli_query($conn, $queryAlunoProf);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Confirmar Troca de Aluno') {
+  $novoAluno = trim($_POST["alterar_aluno"]);
+
+  // Atualiza o banco de dados
+  $queryUpdateAluno = "UPDATE AssociacaoPacientesAlunos SET id_aluno = $novoAluno WHERE id_paciente = $idPaciente";
+  $stmtUpdateAluno = mysqli_prepare($conn, $queryUpdateAluno);
+
+  if (mysqli_stmt_execute($stmtUpdateAluno)) {
+      $sucesso_acesso = "Aluno trocado com sucesso!";
+  } else {
+      $erro_acesso = "Erro ao trocar aluno: " . mysqli_error($conn);
+  }
+
+  mysqli_stmt_close($stmtUpdateAluno);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -122,6 +164,9 @@ if (!$exists) {
             formInputs.forEach(input => input.disabled = false);
             alterarBtn.disabled = true;
             concluidoBtn.disabled = false;
+            trocarAlunoBtn.disabled = false;
+            var alunoRespField = document.getElementById('aluno_resp');
+            alunoRespField.disabled = true;
         });
 
         form.addEventListener('submit', function(event) {
@@ -386,6 +431,26 @@ if (!$exists) {
                 <input type="text" name="necessidade_especial" id="necessidade_especial" value="<?php echo $paciente['necessidade_especial']; ?>" disabled>
                 <span id="necessidadeError" class="error"></span>
                 </div>
+              <div class="form_input">
+                <label for="aluno_resp">Aluno Responsável:</label>
+                <input type="text" name="aluno_resp" id="aluno_resp" value="<?php echo $alunoResp['nome']; ?>" disabled>
+                </div>
+              <?php if($nivelAcesso == 'professor'): ?>
+              <div class="form_input">
+                <label for="alterar_aluno">Alterar Aluno:</label>
+                <select name="alterar_aluno" id="alterar_aluno" disabled>
+                  <option value="">Selecione um Aluno:</option>
+                    <?php
+                    while ($row = mysqli_fetch_assoc($resultAlunoProf)) {
+                        echo '<option value="' . $row['id_usuario'] . '">' . $row['nome'] . '</option>';
+                    }
+                    ?>
+                </select>
+                </div>
+              <div class="form_group full_width">
+                <button type="submit" id="trocarAlunoBtn" class="botao_azul text_button" name="botao" value="Confirmar Troca de Aluno" disabled>Confirmar Troca de Aluno</button>
+              </div>
+                <?php endif; ?>
             </div>
             <div class="form_group full_width">
               <button type="button" id="alterarBtn" class="botao_azul text_button">Alterar</button>
