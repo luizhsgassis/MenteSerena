@@ -27,6 +27,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['botao']) && $_POST['bo
     echo "Login ou senha incorretos.";
   }
 }
+
+$queryLastAdded = "SELECT * FROM Usuarios ORDER BY id_usuario DESC LIMIT 1";
+$stmtLA = mysqli_prepare($conn, $queryLastAdded);
+mysqli_stmt_execute($stmtLA);
+$resultLA = mysqli_stmt_get_result($stmtLA);
+
+$linha = mysqli_fetch_assoc($resultLA);
+$nomeLA = $linha['nome'];
+$telefoneLA = $linha['telefone'];
+$cpfLA = $linha['cpf'];
+$dataLA = $linha['data_nascimento'];
+
 ?>
 
 <!DOCTYPE html>
@@ -34,26 +46,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['botao']) && $_POST['bo
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="estilo.css">
+    <style>
+        .tooltip {
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .input-container:hover .tooltip {
+            display: block;
+        }
+    </style>
     <title>MenteSerena</title>
 </head>
 <body>
+  <p align="center" style="color:red;">Nome: <?php echo $nomeLA . " ( " . substr($nomeLA, 0, 3) . " ) "; ?></p>
+  <p align="center" style="color:red;">Telefone: <?php echo $telefoneLA . " ( " . substr($telefoneLA, -3) . " ) "; ?></p>
+  <p align="center" style="color:red;">CPF: <?php echo $cpfLA . " ( " . substr($cpfLA, 0, 3) . " ) "; ?></p>
+  <p align="center" style="color:red;">Data de Nascimento: <?php echo $dataLA . " ( " . substr($dataLA, -2) . " ) "; ?></p>
     <section class="login_section">
         <div class="login_container">
             <div class="login_logo">
                 <h3>MenteSerena</h3>
             </div>
             <form class="login_form" action="" method="post">
-                <div>
+                <div class="input-container">
                     <label for="login">Login:</label>
                     <input type="text" name="login" id="login" required>
+                    <div class="tooltip">Placeholder do Login: 3 primeiras letras do nome + 3 últimos números do telefone.</div>
                 </div>
-                <div>
+                <div class="input-container">
                     <label for="senha">Senha:</label>
-                    <input type="password" name="senha" id="senha" required>
+                    <input type="text" name="senha" id="senha" required>
+                    <div class="tooltip">Placeholder da Senha: 3 primeiros dígitos do cpf + dia do nascimento.</div>
                 </div>
                 <button class="login_button" type="submit" name="botao" value="Entrar">Entrar</button>
             </form>
         </div>
     </section>
+    <p align="center" style="color:red;"><strong>Modo de Apresentação:</strong> Este branch do MenteSerena traz alterações específicas com o objetivo de tornar a apresentação mais dinâmica e didática.</p>
+    <br>
+    <p align="center"><strong>Membros da Equipe:</strong></p>
+    <p align="center"><strong>Luiz Henrique Schmidt Gonçalves de Assis (RA:172222862)</strong></p>
+    <p align="center"><strong>João Gabriel Breve (RA:172317201)</strong></p>
+    <p align="center"><strong>Ana Julia Bernardo Lazaro (RA:172211672)</strong></p>
 </body>
 </html>
