@@ -181,7 +181,8 @@ $resultProfessores = mysqli_query($conn, $queryProfessores);
                             <?php
                             if ($totalSessoes > 0) {
                                 foreach ($sessoes as $sessao) {
-                                    echo "<tr>";
+                                    $rowUrl = "acessarSessoes.php?id=" . $sessao['id_sessao'];
+                                    echo "<tr onclick=\"window.location.href='$rowUrl'\">";
                                     echo "<td>{$sessao['id_sessao']}</td>";
                                     echo "<td>{$sessao['consideracoes_finais']}</td>";
                                     echo "<td>{$sessao['nome_paciente']}</td>";
