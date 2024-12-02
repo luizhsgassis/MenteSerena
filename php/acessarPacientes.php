@@ -99,6 +99,15 @@ if ($nivelAcesso == 'aluno'){
   mysqli_stmt_bind_param($stmtSessoes, "ii", $paciente['id_paciente'], $idProfessorLogado);
   mysqli_stmt_execute($stmtSessoes);
   $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
+} else {
+  $querySessoes = "SELECT s.id_sessao, s.data, s.registro_sessao, s.anotacoes, u.nome AS nome_usuario 
+          FROM Sessoes s 
+          LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario 
+          WHERE s.id_paciente = ?";
+  $stmtSessoes = mysqli_prepare($conn, $querySessoes);
+  mysqli_stmt_bind_param($stmtSessoes, "i", $paciente['id_paciente']);
+  mysqli_stmt_execute($stmtSessoes);
+  $resultSessoes = mysqli_stmt_get_result($stmtSessoes);
 }
 // Initialize button variables
 $textoBotao = "Default Text"; // Default text
