@@ -124,16 +124,16 @@ switch ($tipo) {
                       LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
                       WHERE s.id_usuario = $idUsuarioLogado";
         } elseif ($nivelAcesso == 'professor') {
-            $query = "SELECT s.id_sessao, s.id_prontuario, s.id_paciente, s.id_usuario, s.data, s.registro_sessao, s.anotacoes, p.consideracoes_finais, pa.nome AS nome_paciente, u.nome AS nome_usuario 
-                      FROM Sessoes s 
-                      LEFT JOIN Prontuarios p ON s.id_prontuario = p.id_prontuario
-                      LEFT JOIN Pacientes pa ON s.id_paciente = pa.id_paciente
-                      LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
-                      JOIN AssociacaoAlunosProfessores aap ON s.id_usuario = aap.id_aluno
-                      WHERE aap.id_professor = (
-                          SELECT id_professor 
-                          FROM Professores 
-                          WHERE id_usuario = $idUsuarioLogado)";
+            $query = "SELECT s.id_sessao, s.id_prontuario, s.id_paciente, s.id_usuario, s.data, s.registro_sessao, s.anotacoes, pa.nome AS nome_paciente, u.nome AS nome_usuario
+                        FROM Sessoes s
+                        LEFT JOIN Pacientes pa ON s.id_paciente = pa.id_paciente
+                        LEFT JOIN Usuarios u ON s.id_usuario = u.id_usuario
+                        LEFT JOIN Professores pr ON s.id_professor = pr.id_professor
+                        WHERE s.id_professor = (
+                            SELECT id_professor 
+                            FROM Professores 
+                            WHERE id_usuario = $idUsuarioLogado
+                        )";
         } else {
             $query = "SELECT s.id_sessao, s.id_prontuario, s.id_paciente, s.id_usuario, s.data, s.registro_sessao, s.anotacoes, p.consideracoes_finais, pa.nome AS nome_paciente, u.nome AS nome_usuario 
                       FROM Sessoes s 
