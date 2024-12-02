@@ -91,6 +91,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
   mysqli_stmt_close($stmtUpdateLoginSenha);
 }
 
+$queryProfAluno = "SELECT pr.id_professor, u.nome
+                    FROM Professores pr
+                    JOIN Usuarios u ON pr.id_usuario = u.id_usuario
+                    WHERE pr.id_usuario > 0 
+                    ";
+
+$resultProfAluno = mysqli_query($conn, $queryProfAluno);
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['botao'] == 'Confirmar Troca de Professor') {
+  $novoProfessor = trim($_POST["alterar_professor"]);
+
+  // Atualiza o banco de dados
+  $queryUpdateProfessor = "UPDATE AssociacaoAlunosProfessores SET id_professor = $novoProfessor WHERE id_aluno = $idAluno";
+  $stmtUpdateProfessor = mysqli_prepare($conn, $queryUpdateProfessor);
+
+  if (mysqli_stmt_execute($stmtUpdateProfessor)) {
+      $sucesso_acesso = "Professor trocado com sucesso!";
+  } else {
+      $erro_acesso = "Erro ao trocar professor: " . mysqli_error($conn);
+  }
+
+  mysqli_stmt_close($stmtUpdateProfessor);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -116,6 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
             alterarBtn.disabled = true;
             concluidoBtn.disabled = false;
             restaurarLoginBtn.disabled = false;
+            trocarProfBtn.disabled = false;
         });
 
         form.addEventListener('submit', function(event) {
@@ -316,6 +341,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
                 <option value="false" <?php echo ($aluno['ativo'] == 0) ? 'selected' : ''; ?>>Não</option>
               </select>
             </div>
+            <?php if($autorizacao == 'administrador'): ?>
+              <div class="form_input">
+                <label for="alterar_professor">Alterar Professor:</label>
+                <select name="alterar_professor" id="alterar_professor" disabled>
+                  <option value="">Selecione um Professor:</option>
+                  <?php
+                  while ($row = mysqli_fetch_assoc($resultProfAluno)){
+                    echo '<option value="' . $row['id_professor'] . '">' . $row['nome'] . '</option>';
+                  }
+                  ?>
+                </select>
+              </div>
+              <div class="form_group full_width">
+                <button type="submit" id="trocarProfBtn" class="botao_azul text_button" name="botao" value="Confirmar Troca de Professor" disabled>Confirmar Troca de Professor</button>
+              </div>
+            <?php endif; ?>
           </div>
           <div class="form_group full_width">
             <?php if ($autorizacao == 'administrador'): ?>
