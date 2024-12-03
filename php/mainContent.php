@@ -92,11 +92,13 @@ switch ($tipo) {
                         LEFT JOIN Usuarios u ON ad.id_usuario = u.id_usuario
                         WHERE ad.id_usuario = $idUsuarioLogado";
         }elseif ($nivelAcesso == 'professor') {
-            $query = "SELECT ArquivosDigitalizados.id_arquivo, ArquivosDigitalizados.id_paciente, ArquivosDigitalizados.id_usuario, ArquivosDigitalizados.id_sessao, ArquivosDigitalizados.tipo_documento, ArquivosDigitalizados.data_upload
-                        FROM AssociacaoAlunosProfessores
-                        JOIN AssociacaoPacientesAlunos ON AssociacaoAlunosProfessores.id_aluno = AssociacaoPacientesAlunos.id_aluno
-                        JOIN ArquivosDigitalizados ON AssociacaoPacientesAlunos.id_paciente = ArquivosDigitalizados.id_paciente
-                        WHERE AssociacaoAlunosProfessores.id_professor = $idUsuarioLogado";
+            $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario
+                        FROM ArquivosDigitalizados ad
+                        JOIN Pacientes p ON ad.id_paciente = p.id_paciente
+                        JOIN Usuarios u ON ad.id_usuario = u.id_usuario
+                        JOIN AssociacaoAlunosProfessores aap ON ad.id_usuario = aap.id_aluno
+                        JOIN Professores pr ON aap.id_professor = pr.id_professor
+                        WHERE pr.id_usuario = $idUsuarioLogado";
         }else {
             $query = "SELECT ad.id_arquivo, ad.id_paciente, ad.id_usuario, ad.id_sessao, ad.tipo_documento, ad.data_upload, p.nome AS nome_paciente, u.nome AS nome_usuario 
                         FROM ArquivosDigitalizados ad
