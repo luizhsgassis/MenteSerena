@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['botao']) && $_POST['bo
     } else {
         $queryUpdate = "UPDATE Prontuarios SET data_abertura = ?, historico_familiar = ?, historico_social = ?, consideracoes_finais = ? WHERE id_prontuario = ?";
         $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmtUpdate, "issssi", $dataAbertura, $historicoFamiliar, $historicoSocial, $consideracoesFinais, $prontuario['id_prontuario']);
+        mysqli_stmt_bind_param($stmtUpdate, "isssi", $dataAbertura, $historicoFamiliar, $historicoSocial, $consideracoesFinais, $prontuario['id_prontuario']);
 
         if (mysqli_stmt_execute($stmtUpdate)) {
             $sucesso_acesso = "Dados do prontuário atualizados com sucesso!";

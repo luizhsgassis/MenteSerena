@@ -10,6 +10,8 @@ if (!isset($_SESSION['id_usuario'])) {
     exit;
 }
 
+$idUsuario = $_SESSION['id_usuario'];
+
 $erro_cadastro = '';
 $sucesso_cadastro = '';
 
@@ -62,7 +64,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Consulta para obter a lista de pacientes
-$queryPacientes = "SELECT id_paciente, nome FROM Pacientes";
+$queryPacientes = "SELECT pa.id_paciente, pa.nome 
+                    FROM Pacientes pa
+                    JOIN AssociacaoPacientesAlunos apa ON pa.id_paciente = apa.id_paciente
+                    JOIN Usuarios u ON apa.id_aluno = u.id_usuario
+                    WHERE u.id_usuario = $idUsuario";
 $resultPacientes = mysqli_query($conn, $queryPacientes);
 
 // Consulta para obter a lista de sessões
